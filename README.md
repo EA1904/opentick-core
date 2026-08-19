@@ -45,7 +45,7 @@ A custom search combobox filters through thousands of symbols in real time, matc
 Shows complete corporate profiles mapped directly to the active symbol. This includes Sector, Industry, Market Capitalization, Index weights, and a full corporate summary dynamically synced from index database files.
 
 <p align="center">
-  <img src="docs/assets/data_explorer_metadata.png" width="50%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Metadata and Business Activity Panel"/>
+  <img src="docs/assets/data_explorer_metadata.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Metadata and Business Activity Panel"/>
 </p>
 
 ### 💵 4. Dynamic Financials & Asof-Joined Fundamentals
