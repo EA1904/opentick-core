@@ -804,10 +804,10 @@ def index(response: Response):
     <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
 
         <!-- Top Header -->
-        <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+        <header class="border-b border-slate-800 bg-slate-950/70 backdrop-blur-lg sticky top-0 z-50 px-6 py-4 flex items-center justify-between shadow-md shadow-slate-950/50">
             <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-lg bg-slate-950 border border-emerald-500/30 flex items-center justify-center shadow-lg shadow-emerald-500/10">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <div class="w-10 h-10 rounded-xl bg-slate-950 border border-emerald-500/40 flex items-center justify-center shadow-lg shadow-emerald-500/20 transition-all duration-500 hover:border-emerald-400 hover:shadow-emerald-500/30">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="transform hover:scale-110 transition-transform duration-300">
                         <!-- Candlestick left -->
                         <rect x="5" y="9" width="3" height="8" rx="0.5" fill="#10b981"/>
                         <line x1="6.5" y1="6" x2="6.5" y2="9" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/>
@@ -822,16 +822,16 @@ def index(response: Response):
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-lg font-bold tracking-tight text-white"><span class="text-white">Open</span><span class="text-emerald-400">Tick</span></h1>
-                    <p class="text-xs text-slate-400">Data Explorer — Financial Data Lake</p>
+                    <h1 class="text-xl font-extrabold tracking-tight text-white"><span class="text-white">Open</span><span class="text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">Tick</span></h1>
+                    <p class="text-[10px] uppercase font-semibold tracking-wider text-slate-500">Financial Data Lake</p>
                 </div>
             </div>
             <div class="flex items-center space-x-4">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-inner">
+                    <span class="w-2 h-2 mr-2 rounded-full bg-emerald-400 animate-ping"></span>
                     Lake Connecté
                 </span>
-                <span class="text-xs text-slate-500">Localhost:8001</span>
+                <span class="text-xs font-mono text-slate-500 bg-slate-900 border border-slate-800/80 px-2.5 py-1 rounded-lg">localhost:8001</span>
             </div>
         </header>
 
@@ -839,15 +839,15 @@ def index(response: Response):
         <main class="flex-1 flex overflow-hidden">
 
             <!-- Left Panel / Controls -->
-            <section class="w-80 border-r border-slate-800 bg-slate-900 flex flex-col p-6 space-y-6 overflow-y-auto">
+            <section class="w-80 border-r border-slate-800/80 bg-slate-950/45 backdrop-blur-md flex flex-col p-6 space-y-6 overflow-y-auto">
                 <div>
-                    <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4">Configuration</h2>
+                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-4">Configuration</h2>
                     
                     <div class="space-y-4">
                         <!-- Asset Class -->
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Classe d'Actif</label>
-                            <select id="asset-class" onchange="onAssetClassChange()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                            <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Classe d'Actif</label>
+                            <select id="asset-class" onchange="onAssetClassChange()" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
                                 <option value="stocks">Stocks (Actions US)</option>
                                 <option value="forex">Forex (Devises)</option>
                                 <option value="crypto">Crypto (Monnaies)</option>
@@ -857,16 +857,16 @@ def index(response: Response):
 
                         <!-- Symbol -->
                         <div class="relative">
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Symbole</label>
+                            <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Symbole</label>
                             <div class="relative">
-                                <input type="text" id="symbol-search" placeholder="Rechercher un symbole..." onclick="toggleSymbolDropdown(true)" oninput="filterSymbols()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 pr-8 text-sm text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer">
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-slate-400">
+                                <input type="text" id="symbol-search" placeholder="Rechercher un symbole..." onclick="toggleSymbolDropdown(true)" oninput="filterSymbols()" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg px-3 py-2 pr-8 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 cursor-pointer">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-slate-500">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </div>
                             </div>
-                            <div id="symbol-dropdown" class="absolute z-50 left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-slate-900 border border-slate-800 rounded-lg shadow-2xl hidden">
+                            <div id="symbol-dropdown" class="absolute z-50 left-0 right-0 mt-1.5 max-h-64 overflow-y-auto bg-slate-900/95 border border-slate-800 rounded-lg shadow-2xl backdrop-blur-lg hidden">
                                 <!-- Options loaded dynamically -->
                             </div>
                             <input type="hidden" id="symbol" value="">
@@ -874,55 +874,54 @@ def index(response: Response):
 
                         <!-- Timeframe -->
                         <div id="timeframe-container">
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Timeframe</label>
-                            <select id="timeframe" onchange="loadChartData()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                            <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Timeframe</label>
+                            <select id="timeframe" onchange="loadChartData()" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
                                 <!-- Loaded dynamically based on catalog -->
                             </select>
                         </div>
 
                         <!-- Price adjustments -->
-                        <div class="flex items-center space-x-2" id="adjustment-container">
-                            <input type="checkbox" id="adjusted-prices" onchange="loadChartData()" checked class="rounded border-slate-700 text-blue-600 bg-slate-800 focus:ring-blue-500 focus:ring-offset-slate-900">
-                            <label for="adjusted-prices" class="text-xs text-slate-300 select-none">Appliquer les ajustements (splits/div)</label>
-                        </div>
+                        <div class="flex items-center space-x-2.5 pt-1" id="adjustment-container">
+                            <input type="checkbox" id="adjusted-prices" onchange="loadChartData()" checked class="rounded border-slate-800 text-emerald-500 bg-slate-900 focus:ring-emerald-500/30 focus:ring-offset-slate-950">
+                            <label for="adjusted-prices" class="text-xs text-slate-400 select-none cursor-pointer hover:text-slate-300">Appliquer les ajustements (splits/div)</label>
                         </div>
                     </div>
                 </div>
 
                 <!-- Database Statistics -->
-                <div class="border-t border-slate-850 pt-6 space-y-3 text-xs">
-                    <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Statistiques S&P 500</h2>
-                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-slate-500">Total Index Tickers</span>
-                            <span id="stats-total" class="font-semibold text-slate-200">-</span>
+                <div class="border-t border-slate-900 pt-6 space-y-3 text-xs">
+                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Statistiques S&P 500</h2>
+                    <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-900 space-y-2.5 shadow-md shadow-slate-950/20">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Total Index Tickers</span>
+                            <span id="stats-total" class="font-bold text-slate-200 font-mono">-</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500">Importés localement</span>
-                            <span id="stats-imported" class="font-semibold text-emerald-400">-</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Importés localement</span>
+                            <span id="stats-imported" class="font-bold text-emerald-400 font-mono">-</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-500">Non importés</span>
-                            <span id="stats-missing" class="font-semibold text-rose-400">-</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Non importés</span>
+                            <span id="stats-missing" class="font-bold text-rose-400 font-mono">-</span>
                         </div>
-                        <div class="flex justify-between border-t border-slate-800/40 pt-2 mt-1 text-[10px]">
+                        <div class="flex justify-between items-center border-t border-slate-800/50 pt-2 text-[10px]">
                             <span class="text-slate-500">Dernière Sync</span>
-                            <span id="sync-status-time" class="text-slate-400 font-medium">En attente...</span>
+                            <span id="sync-status-time" class="text-slate-400 font-semibold font-mono">En attente...</span>
                         </div>
-                        <div class="border-t border-slate-800/60 pt-2.5 mt-2">
-                            <button id="update-all-btn" onclick="triggerUpdateAll()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded transition duration-150 flex items-center justify-center space-x-1 text-xs">
+                        <div class="pt-2">
+                            <button id="update-all-btn" onclick="triggerUpdateAll()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-2 px-3 rounded-lg transition-all duration-300 shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] text-xs flex items-center justify-center space-x-1.5">
                                 <span>Actualiser la base (EOD)</span>
                             </button>
                         </div>
                         
                         <!-- Progress Tracking Section -->
-                        <div id="ingest-progress-container" class="border-t border-slate-800/60 pt-2.5 mt-2 hidden space-y-2">
+                        <div id="ingest-progress-container" class="border-t border-slate-800/50 pt-2.5 mt-2 hidden space-y-2">
                             <div class="flex justify-between text-[10px]">
                                 <span id="progress-step-name" class="font-semibold text-slate-400">Actualisation</span>
-                                <span id="progress-percent" class="font-bold text-blue-400">0%</span>
+                                <span id="progress-percent" class="font-bold text-emerald-400">0%</span>
                             </div>
                             <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
-                                <div id="progress-bar-fill" class="bg-blue-500 h-1.5 rounded-full transition-all duration-300 w-0 animate-pulse"></div>
+                                <div id="progress-bar-fill" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full transition-all duration-300 w-0"></div>
                             </div>
                             <div id="progress-status" class="text-[9px] text-slate-500 truncate">Vérification de AAPL...</div>
                         </div>
@@ -930,12 +929,12 @@ def index(response: Response):
                 </div>
 
                 <!-- Live Ingestion Form -->
-                <div class="border-t border-slate-850 pt-6 space-y-4 text-xs">
-                    <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Importer / Mettre à jour</h2>
-                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-3">
+                <div class="border-t border-slate-900 pt-6 space-y-4 text-xs">
+                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Importer / Mettre à jour</h2>
+                    <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-900 space-y-3.5 shadow-md shadow-slate-950/20">
                         <div>
-                            <label class="block text-[10px] font-medium text-slate-500 mb-1">Source API</label>
-                            <select id="ingest-source" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-slate-300 focus:outline-none focus:border-blue-500">
+                            <label class="block text-[10px] font-medium text-slate-400 mb-1">Source API</label>
+                            <select id="ingest-source" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-300 focus:outline-none focus:border-emerald-500/50 transition-all duration-200">
                                 <option value="alpaca">Alpaca Markets (M15+)</option>
                                 <option value="yfinance">Yahoo Finance</option>
                                 <option value="fred">FRED API (Macro)</option>
@@ -943,15 +942,15 @@ def index(response: Response):
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-[10px] font-medium text-slate-500 mb-1">Date Début</label>
-                                <input type="date" id="ingest-start" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-slate-300 focus:outline-none focus:border-blue-500">
+                                <label class="block text-[10px] font-medium text-slate-400 mb-1">Date Début</label>
+                                <input type="date" id="ingest-start" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg px-2 py-1 text-slate-300 focus:outline-none focus:border-emerald-500/50 transition-all duration-200">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-medium text-slate-500 mb-1">Date Fin</label>
-                                <input type="date" id="ingest-end" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-slate-300 focus:outline-none focus:border-blue-500">
+                                <label class="block text-[10px] font-medium text-slate-400 mb-1">Date Fin</label>
+                                <input type="date" id="ingest-end" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg px-2 py-1 text-slate-300 focus:outline-none focus:border-emerald-500/50 transition-all duration-200">
                             </div>
                         </div>
-                        <button id="ingest-btn" onclick="triggerIngestion()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-1.5 rounded transition duration-150 flex items-center justify-center space-x-1">
+                        <button id="ingest-btn" onclick="triggerIngestion()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2 rounded-lg transition-all duration-300 shadow-md shadow-blue-500/10 hover:shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98]">
                             <span id="ingest-btn-text">Lancer l'Import</span>
                         </button>
                         <div id="ingest-status" class="text-[10px] text-center font-medium mt-1 hidden"></div>
@@ -959,41 +958,41 @@ def index(response: Response):
                 </div>
 
                 <!-- Metadata details -->
-                <div id="metadata-panel" class="border-t border-slate-850 pt-6 flex-1 flex flex-col space-y-4 text-xs">
-                    <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Métadonnées</h2>
-                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-3">
+                <div id="metadata-panel" class="border-t border-slate-900 pt-6 flex-1 flex flex-col space-y-4 text-xs">
+                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Métadonnées</h2>
+                    <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-900 space-y-3 shadow-md shadow-slate-950/20">
                         <div>
-                            <div class="text-slate-500">Nom Long</div>
-                            <div id="meta-longname" class="font-medium text-slate-200">-</div>
+                            <div class="text-slate-500 text-[10px]">Nom Long</div>
+                            <div id="meta-longname" class="font-semibold text-slate-200">-</div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <div class="text-slate-500">Secteur</div>
-                                <div id="meta-sector" class="font-medium text-slate-200">-</div>
+                                <div class="text-slate-500 text-[10px]">Secteur</div>
+                                <div id="meta-sector" class="font-semibold text-slate-200">-</div>
                             </div>
                             <div>
-                                <div class="text-slate-500">Industrie</div>
-                                <div id="meta-industry" class="font-medium text-slate-200">-</div>
+                                <div class="text-slate-500 text-[10px]">Industrie</div>
+                                <div id="meta-industry" class="font-semibold text-slate-200">-</div>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <div class="text-slate-500">Market Cap</div>
-                                <div id="meta-marketcap" class="font-medium text-slate-200">-</div>
+                                <div class="text-slate-500 text-[10px]">Market Cap</div>
+                                <div id="meta-marketcap" class="font-semibold text-slate-200">-</div>
                             </div>
                             <div>
-                                <div class="text-slate-500">Poids Indice</div>
-                                <div id="meta-weight" class="font-medium text-slate-200">-</div>
+                                <div class="text-slate-500 text-[10px]">Poids Indice</div>
+                                <div id="meta-weight" class="font-semibold text-slate-200">-</div>
                             </div>
                         </div>
                         <div>
-                            <div class="text-slate-500">Bourse</div>
-                            <div id="meta-exchange" class="font-medium text-slate-200">-</div>
+                            <div class="text-slate-500 text-[10px]">Bourse</div>
+                            <div id="meta-exchange" class="font-semibold text-slate-200">-</div>
                         </div>
                     </div>
                     <div class="flex-1 flex flex-col overflow-hidden">
-                        <div class="text-slate-500 mb-1">Résumé de l'activité</div>
-                        <div id="meta-summary" class="bg-slate-950 p-4 rounded-lg border border-slate-800 overflow-y-auto text-slate-400 leading-relaxed max-h-48">
+                        <div class="text-slate-500 text-[10px] mb-1.5 font-medium">Résumé de l'activité</div>
+                        <div id="meta-summary" class="bg-slate-950/60 p-4 rounded-xl border border-slate-900 overflow-y-auto text-slate-400 leading-relaxed max-h-48 shadow-inner">
                             Pas de description commerciale disponible.
                         </div>
                     </div>
@@ -1003,32 +1002,35 @@ def index(response: Response):
             <!-- Right Panel / Main Area -->
             <section class="flex-1 flex flex-col bg-slate-950 overflow-hidden">
                 <!-- Top chart panel -->
-                <div class="h-[440px] p-6 relative flex flex-col min-h-0">
-                    <div class="absolute top-8 left-8 z-10 bg-slate-900/90 border border-slate-800 px-4 py-2 rounded-lg backdrop-blur-sm flex items-center space-x-4 pointer-events-none">
-                        <div id="chart-symbol-label" class="text-base font-bold text-white">-</div>
-                        <div id="chart-price-label" class="text-sm font-semibold text-emerald-400">-</div>
+                <div class="h-[460px] p-6 relative flex flex-col min-h-0 bg-gradient-to-b from-slate-900/20 to-slate-950">
+                    <div id="chart-legend-wrapper" class="absolute top-8 left-8 z-10 bg-slate-950/85 border border-slate-800/80 px-4 py-2 rounded-xl backdrop-blur-lg flex items-center space-x-4 shadow-2xl shadow-slate-950/60 pointer-events-none text-xs select-none">
+                        <div id="chart-symbol-label" class="text-sm font-bold text-white">-</div>
+                        <div id="chart-price-label" class="text-sm font-semibold text-emerald-400 font-mono">-</div>
+                        <div id="chart-ohlcv-legend" class="text-[11px] text-slate-400 font-mono hidden space-x-3">
+                            <!-- Loaded dynamically on hover -->
+                        </div>
                     </div>
                     <div class="absolute top-8 right-8 z-10 flex space-x-2">
-                        <button onclick="downloadCSV()" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-400 flex items-center space-x-1.5 transition duration-150">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <button onclick="downloadCSV()" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800 px-4 py-2 rounded-xl text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center space-x-2 transition-all duration-300 hover:scale-[1.02] shadow-xl shadow-slate-950/50">
+                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             <span>Exporter en CSV</span>
                         </button>
                     </div>
-                    <div id="chart-container" class="w-full flex-1 rounded-xl overflow-hidden border border-slate-800 bg-slate-900">
+                    <div id="chart-container" class="w-full flex-1 rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-950/80 shadow-2xl shadow-slate-950/40">
                         <!-- Chart renders here -->
                     </div>
                 </div>
 
                 <!-- Bottom Tabbed Area -->
-                <div class="flex-1 border-t border-slate-800 bg-slate-900 flex flex-col overflow-hidden">
-                    <div class="border-b border-slate-800 px-6 py-2 flex items-center justify-between bg-slate-900/50">
+                <div class="flex-1 border-t border-slate-900 bg-slate-950/30 flex flex-col overflow-hidden">
+                    <div class="border-b border-slate-900 px-6 py-2 flex items-center justify-between bg-slate-950/50">
                         <div class="flex items-center space-x-6">
-                            <button id="tab-financials-btn" onclick="switchTab('financials')" class="text-sm font-medium border-b-2 border-blue-500 text-blue-500 pb-2 pt-2 focus:outline-none">Données Financières</button>
-                            <button id="tab-table-btn" onclick="switchTab('table')" class="text-sm font-medium text-slate-400 hover:text-slate-200 pb-2 pt-2 focus:outline-none">Données OHLCV (Tableau)</button>
-                            <button id="tab-catalog-btn" onclick="switchTab('catalog')" class="text-sm font-medium text-slate-400 hover:text-slate-200 pb-2 pt-2 focus:outline-none">Infos Dataset Catalogue</button>
-                            <button id="tab-sql-btn" onclick="switchTab('sql')" class="text-sm font-medium text-slate-400 hover:text-slate-200 pb-2 pt-2 focus:outline-none">Console SQL (DuckDB)</button>
+                            <button id="tab-financials-btn" onclick="switchTab('financials')" class="text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 pb-3 pt-3 focus:outline-none transition-colors duration-200">Données Financières</button>
+                            <button id="tab-table-btn" onclick="switchTab('table')" class="text-sm font-semibold text-slate-400 hover:text-slate-200 pb-3 pt-3 focus:outline-none transition-colors duration-200">Données OHLCV (Tableau)</button>
+                            <button id="tab-catalog-btn" onclick="switchTab('catalog')" class="text-sm font-semibold text-slate-400 hover:text-slate-200 pb-3 pt-3 focus:outline-none transition-colors duration-200">Infos Dataset Catalogue</button>
+                            <button id="tab-sql-btn" onclick="switchTab('sql')" class="text-sm font-semibold text-slate-400 hover:text-slate-200 pb-3 pt-3 focus:outline-none transition-colors duration-200">Console SQL (DuckDB)</button>
                         </div>
-                        <div id="table-row-count" class="text-xs text-slate-500 hidden"></div>
+                        <div id="table-row-count" class="text-xs text-slate-500 font-mono"></div>
                     </div>
                     
                     <div class="flex-1 p-6 overflow-auto">
@@ -1428,37 +1430,56 @@ def index(response: Response):
                 
                 chart = LightweightCharts.createChart(container, {
                     layout: {
-                        background: { color: '#0f172a' },
-                        textColor: '#94a3b8',
+                        background: { color: '#060813' },
+                        textColor: '#64748b',
+                        fontSize: 11,
+                        fontFamily: "'Inter', sans-serif",
                     },
                     grid: {
-                        vertLines: { color: '#1e293b' },
-                        horzLines: { color: '#1e293b' },
+                        vertLines: { color: 'rgba(148, 163, 184, 0.04)', style: 2 }, // dotted
+                        horzLines: { color: 'rgba(148, 163, 184, 0.04)', style: 2 }, // dotted
                     },
                     crosshair: {
                         mode: LightweightCharts.CrosshairMode.Normal,
+                        vertLine: {
+                            color: 'rgba(148, 163, 184, 0.25)',
+                            width: 1,
+                            style: 3, // dashed
+                            labelBackgroundColor: '#0f172a',
+                        },
+                        horzLine: {
+                            color: 'rgba(148, 163, 184, 0.25)',
+                            width: 1,
+                            style: 3, // dashed
+                            labelBackgroundColor: '#0f172a',
+                        },
                     },
                     rightPriceScale: {
-                        borderColor: '#334155',
+                        borderColor: 'rgba(148, 163, 184, 0.08)',
+                        textColor: '#64748b',
                     },
                     timeScale: {
-                        borderColor: '#334155',
+                        borderColor: 'rgba(148, 163, 184, 0.08)',
+                        textColor: '#64748b',
                         timeVisible: true,
                         secondsVisible: false,
                     },
                 });
 
-                // Add series
+                // Add series with premium colors
                 candleSeries = chart.addCandlestickSeries({
                     upColor: '#10b981',
-                    downColor: '#ef4444',
-                    borderVisible: false,
+                    downColor: '#f43f5e',
+                    borderVisible: true,
+                    borderColor: '#10b981',
+                    borderUpColor: '#10b981',
+                    borderDownColor: '#f43f5e',
                     wickUpColor: '#10b981',
-                    wickDownColor: '#ef4444',
+                    wickDownColor: '#f43f5e',
                 });
 
                 volumeSeries = chart.addHistogramSeries({
-                    color: '#26a69a',
+                    color: 'rgba(16, 185, 129, 0.25)',
                     priceFormat: {
                         type: 'volume',
                     },
@@ -1467,17 +1488,87 @@ def index(response: Response):
                 
                 volumeSeries.priceScale().applyOptions({
                     scaleMargins: {
-                        top: 0.8, // volume at bottom
+                        top: 0.82, // volume at bottom
                         bottom: 0,
                     },
                 });
 
                 areaSeries = chart.addAreaSeries({
-                    topColor: 'rgba(59, 130, 246, 0.4)',
-                    bottomColor: 'rgba(59, 130, 246, 0.0)',
-                    lineColor: '#3b82f6',
+                    topColor: 'rgba(16, 185, 129, 0.22)',
+                    bottomColor: 'rgba(16, 185, 129, 0.0)',
+                    lineColor: '#10b981',
                     lineWidth: 2,
                 });
+
+                // Subscribe to crosshair move to display premium real-time legend values
+                chart.subscribeCrosshairMove(param => {
+                    const ohlcvLegend = document.getElementById('chart-ohlcv-legend');
+                    const priceLabel = document.getElementById('chart-price-label');
+                    
+                    if (!param.time || !param.point || param.point.x < 0 || param.point.y < 0) {
+                        // Reset to last bar when cursor leaves
+                        updateLegendWithLastBar();
+                    } else {
+                        const candleData = param.seriesData.get(candleSeries);
+                        const volumeData = param.seriesData.get(volumeSeries);
+                        const areaData = param.seriesData.get(areaSeries);
+                        
+                        let dateStr = "";
+                        if (typeof param.time === 'string') {
+                            dateStr = param.time;
+                        } else if (typeof param.time === 'object' && param.time !== null) {
+                            dateStr = `${param.time.year}-${String(param.time.month).padStart(2,'0')}-${String(param.time.day).padStart(2,'0')}`;
+                        } else {
+                            // timestamp
+                            const date = new Date(param.time * 1000);
+                            dateStr = date.toISOString().split('T')[0];
+                        }
+
+                        if (candleData) {
+                            ohlcvLegend.classList.remove('hidden');
+                            ohlcvLegend.classList.add('flex');
+                            priceLabel.classList.add('hidden');
+                            
+                            const isUp = candleData.close >= candleData.open;
+                            const colorClass = isUp ? 'text-emerald-400' : 'text-rose-400';
+                            
+                            const o = candleData.open.toFixed(4);
+                            const h = candleData.high.toFixed(4);
+                            const l = candleData.low.toFixed(4);
+                            const c = candleData.close.toFixed(4);
+                            const v = volumeData ? volumeData.value.toLocaleString() : '-';
+                            
+                            ohlcvLegend.innerHTML = `
+                                <span>D: <strong class="text-slate-200">${dateStr}</strong></span>
+                                <span>O: <strong class="${colorClass}">${o}</strong></span>
+                                <span>H: <strong class="${colorClass}">${h}</strong></span>
+                                <span>L: <strong class="${colorClass}">${l}</strong></span>
+                                <span>C: <strong class="${colorClass}">${c}</strong></span>
+                                <span>V: <strong class="text-slate-200">${v}</strong></span>
+                            `;
+                        } else if (areaData) {
+                            ohlcvLegend.classList.remove('hidden');
+                            ohlcvLegend.classList.add('flex');
+                            priceLabel.classList.add('hidden');
+                            
+                            const val = areaData.value.toFixed(4);
+                            ohlcvLegend.innerHTML = `
+                                <span>D: <strong class="text-slate-200">${dateStr}</strong></span>
+                                <span>Valeur: <strong class="text-emerald-400">${val}</strong></span>
+                            `;
+                        } else {
+                            updateLegendWithLastBar();
+                        }
+                    }
+                });
+
+                function updateLegendWithLastBar() {
+                    const ohlcvLegend = document.getElementById('chart-ohlcv-legend');
+                    const priceLabel = document.getElementById('chart-price-label');
+                    ohlcvLegend.classList.add('hidden');
+                    ohlcvLegend.classList.remove('flex');
+                    priceLabel.classList.remove('hidden');
+                }
 
                 // Resize handler
                 const resizeObserver = new ResizeObserver(entries => {
