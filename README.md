@@ -4,178 +4,132 @@
 
 # OpenTick Core — Financial Data Lake & Quant SDK
 
-**Infrastructure de données financières open-source pour quants et traders algorithmiques.**
+**Self-hosted, sub-millisecond financial data infrastructure for quantitative researchers and algorithmic traders.**
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-0.10+-FFC832?style=flat-square&logo=duckdb&logoColor=black)](https://duckdb.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981.svg?style=flat-square)](LICENSE)
 
 </div>
 
 ---
 
-## Qu'est-ce qu'OpenTick ?
+## ⚡ What is OpenTick?
 
-OpenTick est un **Data Lake financier self-hosted** conçu pour centraliser, normaliser et exposer
-des milliers de séries temporelles financières dans un seul environnement cohérent.
+OpenTick is a **high-performance, local-first financial data lake** designed to consolidate, clean, and query massive historical market datasets without the overhead of cloud databases. 
 
-Contrairement aux solutions cloud coûteuses, OpenTick tourne **entièrement en local**, sans
-dépendance à un service tiers, et donne un accès **sub-seconde** à toutes les données via DuckDB.
+By pairing **Apache Parquet (Hive partitioned)** with **DuckDB**, OpenTick delivers sub-millisecond query performance directly on raw files, making it the perfect backplane for backtesting, machine learning, and quantitative research.
 
 ---
 
-## Ce que contient le Data Lake
+## 🖥️ Interactive Data Explorer — Feature Walkthrough
 
-| Asset Class | Couverture | Timeframes | Symboles |
-|-------------|-----------|------------|---------|
-| **US Stocks** | 2022 → Aujourd'hui | D1, H1, 4H, M15, M1 | 503 S&P 500 complets |
-| **Forex** | 2018 → Aujourd'hui | D1, H1, M15 | Majors & Crosses |
-| **Crypto** | 2018 → Aujourd'hui | D1, H1, M15 | BTC, ETH, BNB... |
-| **Macro** | 1950 → Aujourd'hui | Variable | 845k+ séries |
-| **Fondamentaux** | 2016 → Aujourd'hui | Trimestriel | 500+ sociétés |
-| **Options** | 2019 → Aujourd'hui | EOD | SPY, QQQ, ETFs majeurs |
-| **Volatilité** | 2022 → Aujourd'hui | D1 | Realized + Implied Vol |
+The platform includes a built-in visual sandbox running on `http://localhost:8001` that allows you to inspect the health, coverage, and contents of your local data lake.
 
-> **Total : 500+ symboles × 1000+ jours × 5 timeframes = plusieurs dizaines de Go de données historiques.**
+### 📈 1. High-Fidelity Interactive Charts
+Visualize price action using official **TradingView-style interactive charts** featuring real-time candle metrics and volume overlays. Hovering over candles updates the metadata panel and header metrics instantly.
+
+<p align="center">
+  <img src="docs/assets/data_explorer_aapl.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Interactive TradingView Chart View"/>
+</p>
+
+### 🔍 2. Dynamic Real-Time Symbol Search
+A custom search combobox filters through thousands of symbols in real time, matching tickers and company names instantly (`AAPL - Apple Inc.`, `MSFT - Microsoft Corp.`) for a seamless UX.
+
+<p align="center">
+  <img src="docs/assets/data_explorer_home.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Symbol Search Dashboard View"/>
+</p>
+
+### 💻 3. Embedded SQL Console (Powered by DuckDB)
+Query the entire data lake with standard SQL. DuckDB reads directly from compressed Parquet files, allowing you to run analytical queries, filters, and aggregations with sub-millisecond execution times.
+
+<p align="center">
+  <img src="docs/assets/data_explorer_sql.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="SQL Console View"/>
+</p>
+
+### 📊 4. Dataset Catalog & Quality Assurance
+Inspect coverage dates, row counts, and auto-calculated **Quality Scores** (evaluating missing bars, null values, and OHLCV logical consistency) to ensure your data is production-ready.
+
+<p align="center">
+  <img src="docs/assets/data_explorer_catalog.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Data Catalog View"/>
+</p>
 
 ---
 
-## Sources des Données
+## 🐍 Python Quant SDK
 
-| Type de données | Source |
-|----------------|--------|
-| Prix de marché (OHLCV) | Fournisseurs de données financières publics et licenciés |
-| Macro-économique | FRED API — Federal Reserve Bank of St. Louis (domaine public) |
-| Fondamentaux légaux | SEC EDGAR XBRL (données gouvernementales, domaine public) |
-| Fondamentaux financiers | Sources propriétaires additionnelles |
-| Crypto OHLCV | Exchanges publics via API officielle |
-| Forex historique | Courtiers institutionnels via protocole standard |
-| Données alternatives | Fournisseurs tiers sélectionnés et fiables |
-
-> Les données sont collectées à des fins de recherche et d'analyse quantitative uniquement.
-
----
-
-## SDK Python — Ce que vous pouvez faire
+Read and query data directly in Python without running any database servers.
 
 ```python
 from tvdata import get_ohlcv, get_macro, get_fundamentals, sql
 
-# Stocks US — tous timeframes disponibles
-aapl_daily  = get_ohlcv("AAPL", "D1")     # Daily
-aapl_hourly = get_ohlcv("AAPL", "1h")     # Hourly
-aapl_4h     = get_ohlcv("AAPL", "4h")     # 4 Hours
-aapl_m15    = get_ohlcv("AAPL", "15m")    # 15 minutes
-aapl_m1     = get_ohlcv("AAPL", "1m")     # 1 minute
+# ─── Load OHLCV Data (Stocks, Forex, Crypto) ─────────────────────
+# Returns clean Pandas DataFrames instantly
+aapl_daily  = get_ohlcv("AAPL", "D1")     # Daily adjusted
+aapl_1h     = get_ohlcv("AAPL", "1h")     # Hourly intraday
+aapl_15m    = get_ohlcv("AAPL", "15m")    # 15-minute bars
+btc_daily   = get_ohlcv("BTCUSDT", "D1")  # Crypto
 
-# Forex, Crypto
-eurusd = get_ohlcv("EURUSD", "H1")
-btc    = get_ohlcv("BTCUSDT", "D1")
+# ─── Portfolio Loading ──────────────────────────────────────────
+# Load multiple symbols simultaneously
+portfolio = get_ohlcv(["AAPL", "MSFT", "GOOGL", "NVDA"], "D1")
 
-# Multi-symboles — portefeuilles entiers en une ligne
-sp500 = get_ohlcv(["AAPL", "MSFT", "GOOGL", "NVDA", "META"], "D1")
+# ─── Macroeconomic Series (FRED) ───────────────────────────────
+cpi   = get_macro("CPIAUCSL")  # Consumer Price Index
+rates = get_macro("FEDFUNDS")  # Effective Federal Funds Rate
 
-# Données macro FRED — 845k séries disponibles
-cpi    = get_macro("CPIAUCSL")   # Inflation CPI
-rates  = get_macro("FEDFUNDS")   # Fed Funds Rate
-spread = get_macro("T10Y2Y")     # Courbe des taux
+# ─── Fundamental Metrics ────────────────────────────────────────
+# EPS, PE Ratio, Revenue, Free Cash Flow, Debt/Equity, etc.
+fundamentals = get_fundamentals("AAPL")
 
-# Fondamentaux — PE, P/B, EPS, Revenue, FCF...
-funds = get_fundamentals("AAPL")
-
-# SQL direct sur le Data Lake via DuckDB
-df = sql("""
+# ─── Direct High-Performance SQL ──────────────────────────────
+# Leverage DuckDB for lightning-fast analysis
+top_symbols = sql("""
     SELECT symbol, timeframe, COUNT(*) as bars,
-           MIN(timestamp) as debut, MAX(timestamp) as fin,
-           AVG(volume) as vol_moyen
+           MIN(timestamp) as start_date, MAX(timestamp) as end_date
     FROM ohlcv
     WHERE asset_class = 'stocks' AND timeframe = 'D1'
     GROUP BY symbol, timeframe
     ORDER BY bars DESC
-    LIMIT 20
+    LIMIT 10
 """)
 ```
 
 ---
 
-## Data Explorer — Interface Visuelle
+## ⚙️ Quant Ecosystem Integration
 
-Un Data Explorer interactif est intégré, accessible sur `http://localhost:8001` :
-
-- **Recherche dynamique** de symboles (ex: tapez "Apple" → `AAPL - Apple Inc.`)
-- **Graphiques OHLCV interactifs** (TradingView Lightweight Charts)
-- **Onglet Catalogue** — vue d'ensemble de toutes les séries (dates, qualité, nombre de barres)
-- **Onglet SQL** — requêtes DuckDB directes sur le Data Lake
-- **Export CSV** consolidé (OHLCV + fondamentaux forward-fillés)
-- **Actualisation EOD** automatique en arrière-plan
-
-### Démo Vidéo Interactive (WebP)
-
-<div align="center">
-  <img src="docs/assets/opentick_demo.webp" width="100%" alt="OpenTick Data Explorer Interactive Demo" style="border-radius: 12px; border: 1px solid #1e293b;"/>
-</div>
-
-### Aperçu de l'Interface Premium
-
-<div align="center">
-  <table width="100%">
-    <tr>
-      <td width="50%">
-        <p align="center"><b>Graphique interactif (AAPL)</b></p>
-        <img src="docs/assets/data_explorer_aapl.png" width="100%" style="border-radius: 8px; border: 1px solid #1e293b;" alt="AAPL Chart View"/>
-      </td>
-      <td width="50%">
-        <p align="center"><b>Console SQL DuckDB intégrée</b></p>
-        <img src="docs/assets/data_explorer_sql.png" width="100%" style="border-radius: 8px; border: 1px solid #1e293b;" alt="SQL Console View"/>
-      </td>
-    </tr>
-    <tr>
-      <td width="50%">
-        <p align="center"><b>Catalogue & Qualité des données</b></p>
-        <img src="docs/assets/data_explorer_catalog.png" width="100%" style="border-radius: 8px; border: 1px solid #1e293b;" alt="Catalog View"/>
-      </td>
-      <td width="50%">
-        <p align="center"><b>Configuration initiale</b></p>
-        <img src="docs/assets/data_explorer_home.png" width="100%" style="border-radius: 8px; border: 1px solid #1e293b;" alt="Home Setup View"/>
-      </td>
-    </tr>
-  </table>
-</div>
-
----
-
-## Intégration avec l'écosystème Quant
+OpenTick interfaces natively with standard Python backtesting, optimization, and ML frameworks.
 
 ```python
-# Backtrader — backtesting stratégies
+# ─── Backtrader (Backtesting) ──────────────────────────────────
 import backtrader as bt
 cerebro = bt.Cerebro()
 cerebro.adddata(bt.feeds.PandasData(dataname=get_ohlcv("SPY", "D1")))
 cerebro.run()
 
-# QuantStats — rapport de performance complet
+# ─── QuantStats (Performance & Risk Analytics) ──────────────────
 import quantstats as qs
 returns = get_ohlcv("SPY", "D1")["close"].pct_change().dropna()
 qs.reports.html(returns, benchmark="SPY", output="report.html")
 
-# PyPortfolioOpt — optimisation de portefeuille Markowitz
+# ─── PyPortfolioOpt (Portfolio Optimization) ───────────────────
 from pypfopt import EfficientFrontier, expected_returns, risk_models
-prices = get_ohlcv(["AAPL","MSFT","GOOGL","NVDA"], "D1").pivot(
+prices = get_ohlcv(["AAPL", "MSFT", "GOOGL", "NVDA"], "D1").pivot(
     index="timestamp", columns="symbol", values="adj_close"
 )
-weights = EfficientFrontier(
-    expected_returns.mean_historical_return(prices),
-    risk_models.CovarianceShrinkage(prices).ledoit_wolf()
-).max_sharpe()
+mu = expected_returns.mean_historical_return(prices)
+S  = risk_models.CovarianceShrinkage(prices).ledoit_wolf()
+weights = EfficientFrontier(mu, S).max_sharpe()
 
-# Feature Engineering ML — directement depuis SQL
+# ─── ML Feature Engineering ─────────────────────────────────────
+# Calculate momentum, rolling volatility, and fundamentals on the fly
 features = sql("""
     SELECT symbol, timestamp, close, volume,
            realized_vol_30d, implied_vol, pe_ratio, beta_adj,
-           (close - LAG(close,20) OVER (PARTITION BY symbol ORDER BY timestamp))
-           / LAG(close,20) OVER (PARTITION BY symbol ORDER BY timestamp) as momentum_20d
+           (close - LAG(close, 20) OVER (PARTITION BY symbol ORDER BY timestamp))
+           / LAG(close, 20) OVER (PARTITION BY symbol ORDER BY timestamp) as momentum_20d
     FROM ohlcv_consolidated
     WHERE asset_class = 'stocks' AND timeframe = 'D1'
 """)
@@ -183,7 +137,25 @@ features = sql("""
 
 ---
 
-## Architecture Technique
+## 📊 Data Coverage & Sources
+
+OpenTick aggregates data from standard APIs and highly reliable, institutional-grade vendors. 
+
+| Asset Class | Coverage | Timeframes | Source / Provider |
+|-------------|-----------|------------|-------------------|
+| **US Stocks** | 2022 → Today | D1, H1, 4H, M15, M1 | Public APIs & Licensed Market Feeds |
+| **Forex** | 2018 → Today | D1, H1, M15 | Institutional Liquidity Providers |
+| **Crypto** | 2018 → Today | D1, H1, M15 | Major Public Exchanges |
+| **Macro Data** | 1950 → Today | Monthly / Qtr | FRED — Federal Reserve Bank (Public Domain) |
+| **Corporate Filings** | 2016 → Today | Quarterly | SEC EDGAR XBRL (Public Domain) |
+| **Fundamentals** | 2016 → Today | Quarterly | Selected Reliable Third-Party Providers |
+| **Options** | 2019 → Today | EOD | Options Clearing Houses & End-of-Day Feeds |
+
+---
+
+## 🏗️ Technical Architecture
+
+OpenTick stores data in columnar Parquet files on disk and runs queries in-process, bypassing the latency of client-server databases.
 
 ```
 +----------------------------------------------------------+
@@ -208,98 +180,54 @@ features = sql("""
 +----------------------------------------------------------+
 ```
 
-| Couche | Technologie | Choix Technique |
-|--------|-------------|-----------------|
-| Stockage | **Apache Parquet** | Columnar, compression 80% vs CSV |
-| Requêtes | **DuckDB** | SQL analytique in-process, zéro serveur |
-| Partitionnement | **Hive** | `asset_class/timeframe/symbol` — scan ciblé |
-| Catalogue | **SQLite** | Métadonnées légères et portables |
-| Timestamps | **UTC strict** | Toutes sources normalisées en UTC naïf |
-| Joins fondamentaux | **merge_asof** | Forward-fill pour données trimestrielles |
-| API | **FastAPI** | REST + WebSocket, Auth JWT |
+- **Apache Parquet**: Columnar storage with Snappy compression (~80% space saving vs CSV).
+- **DuckDB**: Fast, serverless analytical engine designed for SQL queries on columnar data.
+- **Hive Partitioning**: `asset_class/timeframe/symbol` structure guarantees sub-10ms query execution times by pruning irrelevant directories before scanning.
+- **SQLite Catalog**: Light, local registry storing data indices, symbol profiles, and data quality metrics.
+- **Strict UTC Normalization**: Ingestion connectors enforce timezone normalization to ensure exact cross-asset timing alignment.
 
 ---
 
-## Qualité des Données
+## 🔌 Available Connectors
 
-Chaque série du catalogue dispose d'un **quality score** (0-100) calculé automatiquement :
-
-- Pourcentage de valeurs nulles par colonne
-- Détection des gaps et discontinuités temporelles
-- Cohérence OHLCV (high ≥ low, close ∈ [low, high])
-- Couverture vs calendrier boursier officiel
-
-```python
-quality = sql("""
-    SELECT symbol, timeframe, rows_count, quality_score,
-           start_date, end_date
-    FROM data_catalog
-    WHERE quality_score < 90
-    ORDER BY quality_score ASC
-""")
-```
+Included out-of-the-box in the SDK:
+- `alpaca_connector` — Intraday stock prices (requires free API key).
+- `binance_connector` — Crypto OHLCV (no key required).
+- `fred_connector` — Macroeconomic time series (requires free FRED API key).
+- `sec_connector` — SEC EDGAR fundamentals parser.
+- `dolt_connector` — Option chains and earnings datasets.
+- `metatrader` — Institutional Forex history from MT4/MT5.
+- `update_all_stocks` — Automatic daily EOD indexing script.
 
 ---
 
-## Connecteurs Disponibles
+## 🤝 Contact & Collaboration
 
-| Connecteur | Données | Clé requise |
-|------------|---------|-------------|
-| `alpaca_connector` | Stocks/Crypto intraday | ✅ Gratuit |
-| `binance_connector` | Crypto OHLCV toutes résolutions | ❌ |
-| `fred_connector` | 845k+ séries macro | ✅ Gratuit |
-| `sec_connector` | Bilans, P&L, Cash Flow (XBRL) | ❌ |
-| `dolt_connector` | Options, Earnings | ❌ |
-| `metatrader` | Forex/CFD historiques | ✅ Broker |
-| Sources additionnelles | Fondamentaux propriétaires | — |
+This repository contains the **core source code** (SDK, connectors, and Data Explorer UI). The historical dataset (~22 GB of pre-built Parquet files) is distributed separately.
+
+### Get in Touch:
+- 🗄️ **Get Data Lake Access**: Open an [Issue on GitHub](https://github.com/EA1904/opentick-core/issues) to request the historical data archive.
+- 🤝 **Collaborate**: If you are a quantitative researcher, analyst, or developer looking to integrate OpenTick into your pipeline, reach out via my [GitHub Profile](https://github.com/EA1904).
+- 🐛 **Contribute**: Feel free to submit a Pull Request or open an issue for connector upgrades and bug fixes.
 
 ---
 
 ## Disclaimer
 
-> Ce projet est fourni à des fins de **recherche et d'éducation uniquement**.
-> OpenTick est une infrastructure de données. Il ne constitue pas un conseil financier.
-> Vérifiez toujours l'exactitude des données avant toute décision d'investissement.
-> Les données collectées le sont dans le respect des conditions d'utilisation
-> de chaque fournisseur, à des fins non commerciales et de recherche.
+> **For research and educational purposes only.** 
+> OpenTick is a data infrastructure tool and does not constitute financial advice. Always verify data independently before risking capital. Data is fetched in compliance with API terms of service.
 
 ---
 
-## Contact & Collaboration
+## License
 
-Ce repository contient le **code source open-source** (SDK + Data Explorer).
-Le Data Lake complet avec l'historique de données est distribué séparément.
-
-### Vous êtes intéressé(e) par :
-
-| Besoin | Comment me contacter |
-|--------|---------------------|
-| 🗄️ **Accès au Data Lake complet** (~22 Go de données historiques) | Ouvrez une [Issue GitHub](https://github.com/EA1904/opentick-core/issues) |
-| 🤝 **Collaboration recherche / quant** | Contactez via [GitHub Profile](https://github.com/EA1904) |
-| 🔌 **Intégration dans votre projet** | Ouvrez une [Issue GitHub](https://github.com/EA1904/opentick-core/issues) |
-| 🐛 **Bug report / amélioration SDK** | Pull Request ou [Issue](https://github.com/EA1904/opentick-core/issues) |
-
-### Contribuer au code
-
-1. Fork le repo
-2. Créez votre branche : `git checkout -b feat/ma-contribution`
-3. Committez : `git commit -m 'feat: description'`
-4. Pushez : `git push origin feat/ma-contribution`
-5. Ouvrez une **Pull Request**
-
----
-
-## Licence
-
-MIT — Voir [LICENSE](LICENSE).
-
----
+MIT — See [LICENSE](LICENSE).
 
 <div align="center">
 
-**OpenTick Core — Open-source. Self-hosted. Libre.**
+**OpenTick Core — Open-Source. Local-First. Free.**
 
-*Construit pour les quants, data scientists et traders algorithmiques.*
+*Designed with ❤️ for quant researchers and system traders.*
 
 **[@EA1904](https://github.com/EA1904)**
 
