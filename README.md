@@ -27,49 +27,46 @@ By pairing **Apache Parquet (Hive partitioned)** with **DuckDB**, OpenTick deliv
 
 The platform includes a built-in visual sandbox running on `http://localhost:8001` that allows you to inspect the health, coverage, and contents of your local data lake.
 
-### 📈 1. High-Fidelity Interactive Charts
-Visualize price action using official **TradingView-style interactive charts** featuring real-time candle metrics and volume overlays. Hovering over candles updates the metadata panel and header metrics instantly.
+### 🎛️ 1. Unified Dashboard (Charts, Search & Corporate Profiles)
+The main workspace combines three critical systems in a single reactive layout:
+- **A. High-Fidelity Interactive Charts**: Official **TradingView-style interactive charts** featuring real-time candle metrics, dynamic crosshair tracking, and volume overlays.
+- **B. Dynamic Real-Time Symbol Search**: A custom search combobox that filters through thousands of symbols instantly, matching tickers and company names (`AAPL - Apple Inc.`).
+- **C. Left Metadata & Business Activity Panel**: Complete corporate profiles mapped directly to the active symbol (Sector, Industry, Market Capitalization, Index weights, and a full corporate summary).
 
 <p align="center">
-  <img src="docs/assets/data_explorer_aapl.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Interactive TradingView Chart View"/>
+  <img src="docs/assets/data_explorer_aapl.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Unified Dashboard View"/>
 </p>
 
-### 🔍 2. Dynamic Real-Time Symbol Search
-A custom search combobox filters through thousands of symbols in real time, matching tickers and company names instantly (`AAPL - Apple Inc.`, `MSFT - Microsoft Corp.`) for a seamless UX.
+---
 
-<p align="center">
-  <img src="docs/assets/data_explorer_home.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Symbol Search Dashboard View"/>
-</p>
-
-### 📊 3. Left Metadata & Business Activity Panel
-Shows complete corporate profiles mapped directly to the active symbol. This includes Sector, Industry, Market Capitalization, Index weights, and a full corporate summary dynamically synced from index database files.
-
-<p align="center">
-  <img src="docs/assets/data_explorer_metadata.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Metadata and Business Activity Panel"/>
-</p>
-
-### 💵 4. Dynamic Financials & Asof-Joined Fundamentals
+### 💵 2. Dynamic Financials & Asof-Joined Fundamentals
 Displays historical quarterly income statements, balance sheets, and cash flows. The backend processes corporate filings in real-time, matching them with trading days via `asof` backward-joins to represent true point-in-time financial state without lookahead bias.
 
 <p align="center">
   <img src="docs/assets/data_explorer_financials.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Financials Data Tab"/>
 </p>
 
-### 📋 5. Raw OHLCV Price Tables
+---
+
+### 📋 3. Raw OHLCV Price Tables
 View raw timestamped prices directly in a tabular view. The table loads thousands of bars in milliseconds, showing timestamp (UTC), Open, High, Low, Close, and Volume.
 
 <p align="center">
   <img src="docs/assets/data_explorer_ohlcv_table.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="OHLCV Raw Data Table Tab"/>
 </p>
 
-### 💻 6. Embedded SQL Console (Powered by DuckDB)
+---
+
+### 💻 4. Embedded SQL Console (Powered by DuckDB)
 Query the entire data lake with standard SQL. DuckDB reads directly from compressed Parquet files, allowing you to run analytical queries, filters, and aggregations with sub-millisecond execution times.
 
 <p align="center">
   <img src="docs/assets/data_explorer_sql.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="SQL Console View"/>
 </p>
 
-### 📊 7. Dataset Catalog & Quality Assurance
+---
+
+### 📊 5. Dataset Catalog & Quality Assurance
 Inspect coverage dates, row counts, and auto-calculated **Quality Scores** (evaluating missing bars, null values, and OHLCV logical consistency) to ensure your data is production-ready.
 
 <p align="center">
@@ -78,23 +75,27 @@ Inspect coverage dates, row counts, and auto-calculated **Quality Scores** (eval
 
 ---
 
-## 📥 Consolidated CSV Export
+## 📥 Consolidated Point-in-Time CSV Export
 
 Clicking the **"Exporter en CSV"** button exports a single, fully consolidated CSV file that blends both market price action and fundamental corporate metrics.
 
-### What the CSV Contains:
-The exported CSV aligns daily price bars with quarterly fundamentals using a strict `backward-fill` join, meaning quarterly numbers are carried forward daily until a new report is released. This provides a complete matrix for backtesting or machine learning features:
-- `date` & `symbol` (UTC aligned)
-- `open`, `high`, `low`, `close`, `volume`
-- `realized_vol_30d` & `implied_vol`
-- `pe_ratio`, `price_to_book`, `beta_raw`, `beta_adj`
-- `revenue`, `net_income`, `eps`, `cash`, `free_cash_flow`
+### Why this is a Game-Changer for Quant Models:
+Standard financial exports suffer from **lookahead bias** (joining quarterly reports to days before they were actually published) or **exact-date drops** (missing quarterly metrics on daily bars). 
+
+OpenTick implements a strict **Point-in-Time `asof` backward-join** at the DuckDB engine level. Quarterly financials are carried forward daily *only after the official SEC publication timestamp*, providing a clean, unbiased tabular matrix directly printable or ready for Pandas, Scikit-learn, or PyTorch:
+
+```csv
+date,symbol,open,high,low,close,volume,realized_vol_30d,implied_vol,pe_ratio,free_cash_flow,eps,revenue
+2024-12-18,AAPL,227.15,229.30,226.85,228.02,52140300,18.42,21.15,31.25,108420000000,6.15,385700000000
+2024-12-19,AAPL,228.00,230.45,227.90,229.55,49610200,18.15,20.90,31.42,108420000000,6.15,385700000000
+2024-12-20,AAPL,229.40,231.85,229.10,231.10,54210300,17.95,20.65,31.68,108420000000,6.15,385700000000
+```
 
 ---
 
 ## 🐍 Python Quant SDK & Local Database Link
 
-You can link your python code directly to the local data files without launching any database engines. The SDK leverages DuckDB to query Parquet files on disk at CPU-bound speeds.
+You can link your python code directly to the local data files without running any database engines. The SDK leverages DuckDB to query Parquet files on disk at CPU-bound speeds.
 
 ### How to Link Your Local Files:
 Simply install the requirements and set the `OPENTICK_DATA_ROOT` environment variable in your script pointing to your `opentick-data` directory.
