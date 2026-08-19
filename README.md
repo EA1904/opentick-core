@@ -111,6 +111,39 @@ Un Data Explorer interactif est intégré, accessible sur `http://localhost:8001
 - **Export CSV** consolidé (OHLCV + fondamentaux forward-fillés)
 - **Actualisation EOD** automatique en arrière-plan
 
+### Démo Vidéo Interactive (WebP)
+
+<div align="center">
+  <img src="docs/assets/opentick_demo.webp" width="100%" alt="OpenTick Data Explorer Interactive Demo" style="border-radius: 12px; border: 1px solid #1e293b;"/>
+</div>
+
+### Aperçu de l'Interface Premium
+
+<div align="center">
+  <table width="100%">
+    <tr>
+      <td width="50%">
+        <p align="center"><b>Graphique interactif (AAPL)</b></p>
+        <img src="docs/assets/data_explorer_aapl.png" width="100%" style="border-radius: 8px; border: 1px solid #1e293b;" alt="AAPL Chart View"/>
+      </td>
+      <td width="50%">
+        <p align="center"><b>Console SQL DuckDB intégrée</b></p>
+        <img src="docs/assets/data_explorer_sql.png" width="100%" style="border-radius: 8px; border: 1px solid #1e293b;" alt="SQL Console View"/>
+      </td>
+    </tr>
+    <tr>
+      <td width="50%">
+        <p align="center"><b>Catalogue & Qualité des données</b></p>
+        <img src="docs/assets/data_explorer_catalog.png" width="100%" style="border-radius: 8px; border: 1px solid #1e293b;" alt="Catalog View"/>
+      </td>
+      <td width="50%">
+        <p align="center"><b>Configuration initiale</b></p>
+        <img src="docs/assets/data_explorer_home.png" width="100%" style="border-radius: 8px; border: 1px solid #1e293b;" alt="Home Setup View"/>
+      </td>
+    </tr>
+  </table>
+</div>
+
 ---
 
 ## Intégration avec l'écosystème Quant
