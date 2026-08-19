@@ -1,0 +1,37 @@
+# .gitignore — OpenTick Core
+
+# Données (ne jamais versionner)
+lake/
+data/
+*.parquet
+catalog.db
+
+# Environnement
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Logs & temporaires
+*.log
+ingest_progress.json
+temp_*.js
+temp_*.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

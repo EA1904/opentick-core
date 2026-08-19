@@ -1,0 +1,24 @@
+version: "3.8"
+
+# OpenTick Core — Stack Minimale (Data Explorer uniquement)
+# Usage : docker compose -f docker-compose.core.yml up --build
+
+services:
+  data-explorer:
+    build:
+      context: .
+      dockerfile: Dockerfile.core
+    container_name: opentick_core
+    restart: always
+    environment:
+      - OPENTICK_DATA_ROOT=/data
+    ports:
+      - "8001:8001"
+    volumes:
+      - .:/workspace
+      - ${OPENTICK_DATA_ROOT:-./data}:/data
+    command: uvicorn data_explorer:app --host 0.0.0.0 --port 8001 --reload
+
+networks:
+  default:
+    name: opentick_core_net
