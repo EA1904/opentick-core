@@ -52,7 +52,7 @@ dépendance à un service tiers, et donne un accès **sub-seconde** à toutes le
 | Fondamentaux financiers | Sources propriétaires additionnelles |
 | Crypto OHLCV | Exchanges publics via API officielle |
 | Forex historique | Courtiers institutionnels via protocole standard |
-| Données alternatives | Fournisseurs tiers sélectionnés |
+| Données alternatives | Fournisseurs tiers sélectionnés et fiables |
 
 > Les données sont collectées à des fins de recherche et d'analyse quantitative uniquement.
 
