@@ -1170,56 +1170,56 @@ def index(response: Response):
         </main>
 
         <!-- Export Modal -->
-        <div id="export-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md hidden transition duration-300">
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative backdrop-blur-xl">
+        <div id="export-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md hidden transition duration-300">
+            <div class="bg-[#080c16] border border-slate-800/80 rounded-2xl w-full max-w-xl p-6 shadow-2xl relative">
                 <!-- Close Button -->
-                <button onclick="closeExportModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
+                <button onclick="closeExportModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
                 
-                <h3 class="text-base font-bold text-white mb-1">Configuration de l'Export</h3>
-                <p class="text-xs text-slate-400 mb-4">Exportation des données pour <span id="export-symbol-title" class="font-bold text-blue-400">-</span></p>
+                <h3 class="text-lg font-bold text-white mb-0.5">Configuration de l'Export</h3>
+                <p class="text-xs text-slate-400 mb-5">Exportation des données pour <span id="export-symbol-title" class="font-extrabold text-blue-400">-</span></p>
                 
                 <!-- Date range selection -->
-                <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80 mb-4 space-y-3">
-                    <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Période d'exportation</div>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="bg-[#050810]/60 p-4 rounded-xl border border-slate-900 mb-4 space-y-3 shadow-inner">
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Période d'exportation</div>
+                    <div class="grid grid-cols-2 gap-4 text-xs">
                         <div>
-                            <label class="block text-slate-500 mb-1">Date Début</label>
-                            <input type="date" id="export-start-date" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-blue-500">
+                            <label class="block text-slate-400 mb-1.5 font-medium">Date Début</label>
+                            <input type="date" id="export-start-date" class="w-full bg-[#070b15] border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500 transition duration-150">
                         </div>
                         <div>
-                            <label class="block text-slate-500 mb-1">Date Fin</label>
-                            <input type="date" id="export-end-date" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-blue-500">
+                            <label class="block text-slate-400 mb-1.5 font-medium">Date Fin</label>
+                            <input type="date" id="export-end-date" class="w-full bg-[#070b15] border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500 transition duration-150">
                         </div>
                     </div>
                 </div>
 
                 <!-- Export Format Selection -->
-                <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80 mb-4 space-y-3">
-                    <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Format d'exportation</div>
+                <div class="bg-[#050810]/60 p-4 rounded-xl border border-slate-900 mb-4 space-y-3 shadow-inner">
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Format d'exportation</div>
                     <div class="flex items-center space-x-6 text-xs pl-1">
                         <label class="flex items-center space-x-2 text-slate-300 cursor-pointer select-none">
-                            <input type="radio" name="export-format" value="consolidated" checked class="rounded-full border-slate-700 text-blue-600 bg-slate-900 focus:ring-blue-500">
-                            <span>Fichier unique consolidé (CSV)</span>
+                            <input type="radio" name="export-format" value="consolidated" checked class="w-4 h-4 border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
+                            <span class="font-medium">Fichier unique consolidé (CSV)</span>
                         </label>
                         <label class="flex items-center space-x-2 text-slate-300 cursor-pointer select-none">
-                            <input type="radio" name="export-format" value="separate" class="rounded-full border-slate-700 text-blue-600 bg-slate-900 focus:ring-blue-500">
-                            <span>Fichiers CSV séparés (ZIP)</span>
+                            <input type="radio" name="export-format" value="separate" class="w-4 h-4 border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
+                            <span class="font-medium">Fichiers CSV séparés (ZIP)</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- Checkboxes Container -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-h-[300px] overflow-y-auto pr-1 text-xs" id="export-checkboxes-container">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-h-[280px] overflow-y-auto pr-1 text-xs" id="export-checkboxes-container">
                     <!-- Loaded dynamically -->
                 </div>
                 
-                <div class="flex space-x-3 pt-2 border-t border-slate-800/65">
-                    <button onclick="closeExportModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 rounded-lg text-xs transition duration-150">
+                <div class="flex space-x-3 pt-4 border-t border-slate-900">
+                    <button onclick="closeExportModal()" class="flex-1 bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 font-bold py-2.5 rounded-lg text-xs transition duration-150 active:scale-[0.98]">
                         Annuler
                     </button>
-                    <button id="modal-export-btn" onclick="executeExport()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg text-xs transition duration-150 flex items-center justify-center space-x-1">
+                    <button id="modal-export-btn" onclick="executeExport()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-lg text-xs transition duration-150 flex items-center justify-center space-x-1.5 active:scale-[0.98] shadow-lg shadow-blue-500/25">
                         <span id="modal-export-btn-text">Exporter</span>
                     </button>
                 </div>
@@ -2054,13 +2054,10 @@ def index(response: Response):
                                         <div class="text-xs font-semibold text-slate-200">${m}</div>
                                         <div class="text-[10px] text-slate-500">Série macroéconomique historique</div>
                                     </div>
-                                </label>
-                            `;
-                        });
-                    } else {
+                            } else {
                         // 1. OHLCV timeframes grouped under subheader
                         if (status.ohlcv && status.ohlcv.length > 0) {
-                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-2 mb-1">Séries de Cours (OHLCV)</div>`;
+                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-2 mb-1.5">SÉRIES DE COURS (OHLCV)</div>`;
                             status.ohlcv.forEach(tf => {
                                 const tfLabel = tf === 'D1' ? 'Daily (D1)' 
                                               : tf === '4h' ? '4 Heures (4h)' 
@@ -2073,11 +2070,11 @@ def index(response: Response):
                                               : tf;
                                 const isDefault = (tf === (document.getElementById('timeframe') ? document.getElementById('timeframe').value : 'D1'));
                                 html += `
-                                    <label class="flex items-center space-x-2.5 p-2.5 rounded-lg bg-slate-950 border border-slate-800/80 hover:border-slate-750 transition cursor-pointer select-none col-span-1">
-                                        <input type="checkbox" name="export-item" value="ohlcv_${tf}" ${isDefault ? 'checked' : ''} class="rounded border-slate-700 text-blue-600 bg-slate-900 focus:ring-blue-500">
+                                    <label class="flex items-center space-x-3.5 p-3.5 rounded-lg bg-[#070b15] border border-slate-900/60 hover:border-slate-800 transition cursor-pointer select-none col-span-1 shadow-md shadow-slate-950/20">
+                                        <input type="checkbox" name="export-item" value="ohlcv_${tf}" ${isDefault ? 'checked' : ''} class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
                                         <div>
-                                            <div class="text-xs font-semibold text-slate-200">${tfLabel}</div>
-                                            <div class="text-[9px] text-slate-500">Prix et Volumes</div>
+                                            <div class="text-xs font-bold text-slate-200">${tfLabel}</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Prix et Volumes</div>
                                         </div>
                                     </label>
                                 `;
@@ -2087,31 +2084,31 @@ def index(response: Response):
                         // 2. Financials
                         if (status.financials.income || status.financials.balance || status.financials.cashflow) {
                             html += `
-                                <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2 col-span-1 sm:col-span-2 mt-2">
-                                    <div class="text-xs font-semibold text-slate-200 mb-1 border-b border-slate-900 pb-1">Données Financières (États)</div>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-1">
+                                <div class="p-4 rounded-xl bg-[#050810]/60 border border-slate-900 space-y-3 col-span-1 sm:col-span-2 mt-2 shadow-inner">
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-900 pb-1.5">Données Financières (États)</div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-1">
                             `;
                             if (status.financials.income) {
                                 html += `
-                                    <label class="flex items-center space-x-2 text-[10px] text-slate-300 cursor-pointer select-none">
-                                        <input type="checkbox" name="export-item" value="fin_income" class="rounded border-slate-700 text-blue-600 bg-slate-900 focus:ring-blue-500">
-                                        <span>Compte de résultat (Revenus, EPS...)</span>
+                                    <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer select-none">
+                                        <input type="checkbox" name="export-item" value="fin_income" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
+                                        <span class="font-medium">Compte de résultat (Revenus, EPS...)</span>
                                     </label>
                                 `;
                             }
                             if (status.financials.balance) {
                                 html += `
-                                    <label class="flex items-center space-x-2 text-[10px] text-slate-300 cursor-pointer select-none">
-                                        <input type="checkbox" name="export-item" value="fin_balance" class="rounded border-slate-700 text-blue-600 bg-slate-900 focus:ring-blue-500">
-                                        <span>Bilan Comptable (Actifs, Dette...)</span>
+                                    <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer select-none">
+                                        <input type="checkbox" name="export-item" value="fin_balance" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
+                                        <span class="font-medium">Bilan Comptable (Actifs, Dette...)</span>
                                     </label>
                                 `;
                             }
                             if (status.financials.cashflow) {
                                 html += `
-                                    <label class="flex items-center space-x-2 text-[10px] text-slate-300 cursor-pointer select-none">
-                                        <input type="checkbox" name="export-item" value="fin_cashflow" class="rounded border-slate-700 text-blue-600 bg-slate-900 focus:ring-blue-500">
-                                        <span>Flux de Trésorerie (FCF, Operating CF...)</span>
+                                    <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer select-none">
+                                        <input type="checkbox" name="export-item" value="fin_cashflow" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
+                                        <span class="font-medium">Flux de Trésorerie (FCF, Operating CF...)</span>
                                     </label>
                                 `;
                             }
@@ -2123,37 +2120,37 @@ def index(response: Response):
 
                         // 3. Volatility, Options & Corporate Actions
                         if (status.volatility || status.options || status.corporate_actions) {
-                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-2 mb-1">Volatilité & Dérivés</div>`;
+                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-4 mb-1.5">VOLATILITÉ & DÉRIVÉS</div>`;
                             
                             if (status.volatility) {
                                 html += `
-                                    <label class="flex items-center space-x-2.5 p-2.5 rounded-lg bg-slate-950 border border-slate-800/80 hover:border-slate-750 transition cursor-pointer select-none col-span-1">
-                                        <input type="checkbox" name="export-item" value="volatility" class="rounded border-slate-700 text-blue-600 bg-slate-900 focus:ring-blue-500">
+                                    <label class="flex items-center space-x-3.5 p-3.5 rounded-lg bg-[#070b15] border border-slate-900/60 hover:border-slate-800 transition cursor-pointer select-none col-span-1 shadow-md shadow-slate-950/20">
+                                        <input type="checkbox" name="export-item" value="volatility" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
                                         <div>
-                                            <div class="text-xs font-semibold text-slate-200">Volatilité Optionnelle</div>
-                                            <div class="text-[9px] text-slate-500">HV / IV historiques des options</div>
+                                            <div class="text-xs font-bold text-slate-200">Volatilité Optionnelle</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">HV / IV historiques des options</div>
                                         </div>
                                     </label>
                                 `;
                             }
                             if (status.options) {
                                 html += `
-                                    <label class="flex items-center space-x-2.5 p-2.5 rounded-lg bg-slate-950 border border-slate-800/80 hover:border-slate-750 transition cursor-pointer select-none col-span-1">
-                                        <input type="checkbox" name="export-item" value="options" class="rounded border-slate-700 text-blue-600 bg-slate-900 focus:ring-blue-500">
+                                    <label class="flex items-center space-x-3.5 p-3.5 rounded-lg bg-[#070b15] border border-slate-900/60 hover:border-slate-800 transition cursor-pointer select-none col-span-1 shadow-md shadow-slate-950/20">
+                                        <input type="checkbox" name="export-item" value="options" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
                                         <div>
-                                            <div class="text-xs font-semibold text-slate-200">Chaîne d'Options</div>
-                                            <div class="text-[9px] text-slate-500">Grecques et prix historiques</div>
+                                            <div class="text-xs font-bold text-slate-200">Chaîne d'Options</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Grecques et prix historiques</div>
                                         </div>
                                     </label>
                                 `;
                             }
                             if (status.corporate_actions) {
                                 html += `
-                                    <label class="flex items-center space-x-2.5 p-2.5 rounded-lg bg-slate-950 border border-slate-800/80 hover:border-slate-750 transition cursor-pointer select-none col-span-1 sm:col-span-2">
-                                        <input type="checkbox" name="export-item" value="corporate_actions" class="rounded border-slate-700 text-blue-600 bg-slate-900 focus:ring-blue-500">
+                                    <label class="flex items-center space-x-3.5 p-3.5 rounded-lg bg-[#070b15] border border-slate-900/60 hover:border-slate-800 transition cursor-pointer select-none col-span-1 sm:col-span-2 shadow-md shadow-slate-950/20">
+                                        <input type="checkbox" name="export-item" value="corporate_actions" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
                                         <div>
-                                            <div class="text-xs font-semibold text-slate-200">Actions Corporate</div>
-                                            <div class="text-[9px] text-slate-500">Historique des dividendes versés et splits</div>
+                                            <div class="text-xs font-bold text-slate-200">Actions Corporate</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Historique des dividendes versés et splits</div>
                                         </div>
                                     </label>
                                 `;
@@ -2162,26 +2159,26 @@ def index(response: Response):
 
                         // 4. Bloomberg Golden Data
                         if (status.bloomberg_fundamentals || status.bloomberg_volatility) {
-                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-amber-500 mt-2 mb-1">Données Bloomberg (Golden)</div>`;
+                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-amber-500 mt-4 mb-1.5">DONNÉES BLOOMBERG (GOLDEN)</div>`;
                             
                             if (status.bloomberg_fundamentals) {
                                 html += `
-                                    <label class="flex items-center space-x-2.5 p-2.5 rounded-lg bg-slate-950 border border-amber-900/40 hover:border-amber-700/50 transition cursor-pointer select-none col-span-1 sm:col-span-2">
-                                        <input type="checkbox" name="export-item" value="bb_fundamentals" class="rounded border-amber-800/70 text-amber-600 bg-slate-900 focus:ring-amber-500">
+                                    <label class="flex items-center space-x-3.5 p-3.5 rounded-lg bg-[#070b15] border border-amber-950/20 hover:border-amber-900/40 transition cursor-pointer select-none col-span-1 sm:col-span-2 shadow-md shadow-slate-950/20">
+                                        <input type="checkbox" name="export-item" value="bb_fundamentals" class="w-4 h-4 rounded border-amber-800/40 text-amber-600 bg-[#070b15] focus:ring-amber-500/20">
                                         <div>
-                                            <div class="text-xs font-semibold text-amber-400">Fondamentaux Mensuels (Bloomberg)</div>
-                                            <div class="text-[9px] text-slate-550">Multiples PE, Price-to-Book, Bêta Raw/Adj, Sales</div>
+                                            <div class="text-xs font-bold text-amber-400 font-medium">Fondamentaux Mensuels (Bloomberg)</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Multiples PE, Price-to-Book, Bêta Raw/Adj, Sales</div>
                                         </div>
                                     </label>
                                 `;
                             }
                             if (status.bloomberg_volatility) {
                                 html += `
-                                    <label class="flex items-center space-x-2.5 p-2.5 rounded-lg bg-slate-950 border border-amber-900/40 hover:border-amber-700/50 transition cursor-pointer select-none col-span-1 sm:col-span-2">
-                                        <input type="checkbox" name="export-item" value="bb_volatility" class="rounded border-amber-800/70 text-amber-600 bg-slate-900 focus:ring-amber-500">
+                                    <label class="flex items-center space-x-3.5 p-3.5 rounded-lg bg-[#070b15] border border-amber-950/20 hover:border-amber-900/40 transition cursor-pointer select-none col-span-1 sm:col-span-2 shadow-md shadow-slate-950/20">
+                                        <input type="checkbox" name="export-item" value="bb_volatility" class="w-4 h-4 rounded border-amber-800/40 text-amber-600 bg-[#070b15] focus:ring-amber-500/20">
                                         <div>
-                                            <div class="text-xs font-semibold text-amber-400">Volatilité Réalisée 30D (Bloomberg)</div>
-                                            <div class="text-[9px] text-slate-555">Série quotidienne historique Bloomberg</div>
+                                            <div class="text-xs font-bold text-amber-400 font-medium">Volatilité Réalisée 30D (Bloomberg)</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Série quotidienne historique Bloomberg</div>
                                         </div>
                                     </label>
                                 `;
