@@ -30,15 +30,31 @@ dépendance à un service tiers, et donne un accès **sub-seconde** à toutes le
 
 | Asset Class | Couverture | Timeframes | Symboles |
 |-------------|-----------|------------|---------|
-| **US Stocks** | 2022 → Aujourd'hui | D1, M15 | 503 S&P 500 complets |
+| **US Stocks** | 2022 → Aujourd'hui | D1, H1, 4H, M15, M1 | 503 S&P 500 complets |
 | **Forex** | 2018 → Aujourd'hui | D1, H1, M15 | Majors & Crosses |
 | **Crypto** | 2018 → Aujourd'hui | D1, H1, M15 | BTC, ETH, BNB... |
-| **Macro FRED** | 1950 → Aujourd'hui | Variable | 845k+ séries |
+| **Macro** | 1950 → Aujourd'hui | Variable | 845k+ séries |
 | **Fondamentaux** | 2016 → Aujourd'hui | Trimestriel | 500+ sociétés |
-| **Options** | 2019 → Aujourd'hui | EOD | SPY, QQQ, ETFs |
-| **Volatilité** | 2022 → Aujourd'hui | D1 | Realized + Implied |
+| **Options** | 2019 → Aujourd'hui | EOD | SPY, QQQ, ETFs majeurs |
+| **Volatilité** | 2022 → Aujourd'hui | D1 | Realized + Implied Vol |
 
-> **Total : 500+ symboles × 1000+ jours × plusieurs timeframes = plusieurs dizaines de Go de données.**
+> **Total : 500+ symboles × 1000+ jours × 5 timeframes = plusieurs dizaines de Go de données historiques.**
+
+---
+
+## Sources des Données
+
+| Type de données | Source |
+|----------------|--------|
+| Prix de marché (OHLCV) | Fournisseurs de données financières publics et licenciés |
+| Macro-économique | FRED API — Federal Reserve Bank of St. Louis (domaine public) |
+| Fondamentaux légaux | SEC EDGAR XBRL (données gouvernementales, domaine public) |
+| Fondamentaux financiers | Sources propriétaires additionnelles |
+| Crypto OHLCV | Exchanges publics via API officielle |
+| Forex historique | Courtiers institutionnels via protocole standard |
+| Données alternatives | Fournisseurs tiers sélectionnés |
+
+> Les données sont collectées à des fins de recherche et d'analyse quantitative uniquement.
 
 ---
 
@@ -47,13 +63,19 @@ dépendance à un service tiers, et donne un accès **sub-seconde** à toutes le
 ```python
 from tvdata import get_ohlcv, get_macro, get_fundamentals, sql
 
-# Stocks, Forex, Crypto — une ligne
-aapl  = get_ohlcv("AAPL", "D1")           # Daily S&P 500
-eurusd = get_ohlcv("EURUSD", "H1")        # Forex intraday
-btc   = get_ohlcv("BTCUSDT", "D1")        # Crypto
+# Stocks US — tous timeframes disponibles
+aapl_daily  = get_ohlcv("AAPL", "D1")     # Daily
+aapl_hourly = get_ohlcv("AAPL", "1h")     # Hourly
+aapl_4h     = get_ohlcv("AAPL", "4h")     # 4 Hours
+aapl_m15    = get_ohlcv("AAPL", "15m")    # 15 minutes
+aapl_m1     = get_ohlcv("AAPL", "1m")     # 1 minute
 
-# Multi-symboles — portefeuilles entiers
-sp500 = get_ohlcv(["AAPL","MSFT","GOOGL","NVDA","META"], "D1")
+# Forex, Crypto
+eurusd = get_ohlcv("EURUSD", "H1")
+btc    = get_ohlcv("BTCUSDT", "D1")
+
+# Multi-symboles — portefeuilles entiers en une ligne
+sp500 = get_ohlcv(["AAPL", "MSFT", "GOOGL", "NVDA", "META"], "D1")
 
 # Données macro FRED — 845k séries disponibles
 cpi    = get_macro("CPIAUCSL")   # Inflation CPI
@@ -94,7 +116,7 @@ Un Data Explorer interactif est intégré, accessible sur `http://localhost:8001
 ## Intégration avec l'écosystème Quant
 
 ```python
-# Backtrader — backtesting
+# Backtrader — backtesting stratégies
 import backtrader as bt
 cerebro = bt.Cerebro()
 cerebro.adddata(bt.feeds.PandasData(dataname=get_ohlcv("SPY", "D1")))
@@ -115,8 +137,7 @@ weights = EfficientFrontier(
     risk_models.CovarianceShrinkage(prices).ledoit_wolf()
 ).max_sharpe()
 
-# Scikit-learn / ML — features prêtes à l'emploi
-from tvdata import sql
+# Feature Engineering ML — directement depuis SQL
 features = sql("""
     SELECT symbol, timestamp, close, volume,
            realized_vol_30d, implied_vol, pe_ratio, beta_adj,
@@ -151,10 +172,6 @@ features = sql("""
 |              |          |          |                     |
 |           DuckDB    SQLite      Catalog                  |
 |          (Queries)  (catalog.db) (metadata)              |
-|                                                          |
-|  +-------------------------------------------------------+|
-|  | Yahoo Finance | Alpaca | Binance | FRED | SEC | Dolt  ||
-|  +-------------------------------------------------------+|
 +----------------------------------------------------------+
 ```
 
@@ -164,24 +181,9 @@ features = sql("""
 | Requêtes | **DuckDB** | SQL analytique in-process, zéro serveur |
 | Partitionnement | **Hive** | `asset_class/timeframe/symbol` — scan ciblé |
 | Catalogue | **SQLite** | Métadonnées légères et portables |
-| Timestamps | **UTC strict** | Tous les sources normalisées en UTC naïf |
+| Timestamps | **UTC strict** | Toutes sources normalisées en UTC naïf |
 | Joins fondamentaux | **merge_asof** | Forward-fill pour données trimestrielles |
 | API | **FastAPI** | REST + WebSocket, Auth JWT |
-
----
-
-## Connecteurs Disponibles
-
-| Connecteur | Source | Données | Clé requise |
-|------------|--------|---------|-------------|
-| `yfinance_connector` | Yahoo Finance | OHLCV Stocks/ETF/Indices EOD | ❌ Gratuit |
-| `alpaca_connector` | Alpaca Markets | Stocks/Crypto intraday | ✅ Gratuit |
-| `binance_connector` | Binance REST | Crypto OHLCV toutes résolutions | ❌ Gratuit |
-| `fred_connector` | FRED API | 845k+ séries macro | ✅ Gratuit |
-| `sec_connector` | SEC EDGAR XBRL | Bilans, P&L, Cash Flow | ❌ Gratuit |
-| `dolt_connector` | DoltHub | Options, Earnings | ❌ Gratuit |
-| `metatrader` | MT4/MT5 | Forex/CFD historiques | ✅ Broker |
-| `ingest_bloomberg` | Bloomberg Terminal | Fondamentaux propriétaires | ✅ Payant |
 
 ---
 
@@ -189,15 +191,12 @@ features = sql("""
 
 Chaque série du catalogue dispose d'un **quality score** (0-100) calculé automatiquement :
 
-- % de valeurs nulles par colonne
-- Détection des gaps et discontinuités
+- Pourcentage de valeurs nulles par colonne
+- Détection des gaps et discontinuités temporelles
 - Cohérence OHLCV (high ≥ low, close ∈ [low, high])
-- Couverture temporelle vs calendrier boursier
+- Couverture vs calendrier boursier officiel
 
 ```python
-from tvdata import sql
-
-# Voir la qualité de toutes les séries
 quality = sql("""
     SELECT symbol, timeframe, rows_count, quality_score,
            start_date, end_date
@@ -209,27 +208,17 @@ quality = sql("""
 
 ---
 
-## Obtenir Accès au Data Lake Complet
+## Connecteurs Disponibles
 
-> Ce repository contient le **code source** (SDK + Data Explorer).
-> Le Data Lake complet (~22 Go de données historiques) est distribué séparément.
-
-**Pour obtenir l'environnement complet avec les données :**
-
-📧 **Contactez-moi** via [GitHub Issues](https://github.com/EA1904/opentick-core/issues)
-ou directement sur mon profil GitHub **[@EA1904](https://github.com/EA1904)**.
-
----
-
-## Contribuer
-
-Les contributions au SDK et aux connecteurs sont les bienvenues :
-
-1. Fork le repo
-2. Créez votre branche : `git checkout -b feat/ma-contribution`
-3. Committez : `git commit -m 'feat: description'`
-4. Pushez : `git push origin feat/ma-contribution`
-5. Ouvrez une Pull Request
+| Connecteur | Données | Clé requise |
+|------------|---------|-------------|
+| `alpaca_connector` | Stocks/Crypto intraday | ✅ Gratuit |
+| `binance_connector` | Crypto OHLCV toutes résolutions | ❌ |
+| `fred_connector` | 845k+ séries macro | ✅ Gratuit |
+| `sec_connector` | Bilans, P&L, Cash Flow (XBRL) | ❌ |
+| `dolt_connector` | Options, Earnings | ❌ |
+| `metatrader` | Forex/CFD historiques | ✅ Broker |
+| Sources additionnelles | Fondamentaux propriétaires | — |
 
 ---
 
@@ -238,6 +227,32 @@ Les contributions au SDK et aux connecteurs sont les bienvenues :
 > Ce projet est fourni à des fins de **recherche et d'éducation uniquement**.
 > OpenTick est une infrastructure de données. Il ne constitue pas un conseil financier.
 > Vérifiez toujours l'exactitude des données avant toute décision d'investissement.
+> Les données collectées le sont dans le respect des conditions d'utilisation
+> de chaque fournisseur, à des fins non commerciales et de recherche.
+
+---
+
+## Contact & Collaboration
+
+Ce repository contient le **code source open-source** (SDK + Data Explorer).
+Le Data Lake complet avec l'historique de données est distribué séparément.
+
+### Vous êtes intéressé(e) par :
+
+| Besoin | Comment me contacter |
+|--------|---------------------|
+| 🗄️ **Accès au Data Lake complet** (~22 Go de données historiques) | Ouvrez une [Issue GitHub](https://github.com/EA1904/opentick-core/issues) |
+| 🤝 **Collaboration recherche / quant** | Contactez via [GitHub Profile](https://github.com/EA1904) |
+| 🔌 **Intégration dans votre projet** | Ouvrez une [Issue GitHub](https://github.com/EA1904/opentick-core/issues) |
+| 🐛 **Bug report / amélioration SDK** | Pull Request ou [Issue](https://github.com/EA1904/opentick-core/issues) |
+
+### Contribuer au code
+
+1. Fork le repo
+2. Créez votre branche : `git checkout -b feat/ma-contribution`
+3. Committez : `git commit -m 'feat: description'`
+4. Pushez : `git push origin feat/ma-contribution`
+5. Ouvrez une **Pull Request**
 
 ---
 
