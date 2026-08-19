@@ -79,6 +79,13 @@ Inspect coverage dates, row counts, and auto-calculated **Quality Scores** (eval
 
 Clicking the **"Exporter en CSV"** button exports a single, fully consolidated CSV file that blends both market price action and fundamental corporate metrics.
 
+### Clean Data Alignment (Excel/Pandas Preview)
+The exported CSV presents aligned daily price bars with quarterly fundamentals, providing a ready-to-use dataset for machine learning models and quantitative analyses.
+
+<p align="center">
+  <img src="docs/assets/data_explorer_csv_preview.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Consolidated CSV Export Preview"/>
+</p>
+
 ### Why this is a Game-Changer for Quant Models:
 Standard financial exports suffer from **lookahead bias** (joining quarterly reports to days before they were actually published) or **exact-date drops** (missing quarterly metrics on daily bars). 
 
