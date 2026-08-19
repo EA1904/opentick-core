@@ -41,14 +41,35 @@ A custom search combobox filters through thousands of symbols in real time, matc
   <img src="docs/assets/data_explorer_home.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Symbol Search Dashboard View"/>
 </p>
 
-### 💻 3. Embedded SQL Console (Powered by DuckDB)
+### 📊 3. Left Metadata & Business Activity Panel
+Shows complete corporate profiles mapped directly to the active symbol. This includes Sector, Industry, Market Capitalization, Index weights, and a full corporate summary dynamically synced from index database files.
+
+<p align="center">
+  <img src="docs/assets/data_explorer_metadata.png" width="50%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Metadata and Business Activity Panel"/>
+</p>
+
+### 💵 4. Dynamic Financials & Asof-Joined Fundamentals
+Displays historical quarterly income statements, balance sheets, and cash flows. The backend processes corporate filings in real-time, matching them with trading days via `asof` backward-joins to represent true point-in-time financial state without lookahead bias.
+
+<p align="center">
+  <img src="docs/assets/data_explorer_financials.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Financials Data Tab"/>
+</p>
+
+### 📋 5. Raw OHLCV Price Tables
+View raw timestamped prices directly in a tabular view. The table loads thousands of bars in milliseconds, showing timestamp (UTC), Open, High, Low, Close, and Volume.
+
+<p align="center">
+  <img src="docs/assets/data_explorer_ohlcv_table.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="OHLCV Raw Data Table Tab"/>
+</p>
+
+### 💻 6. Embedded SQL Console (Powered by DuckDB)
 Query the entire data lake with standard SQL. DuckDB reads directly from compressed Parquet files, allowing you to run analytical queries, filters, and aggregations with sub-millisecond execution times.
 
 <p align="center">
   <img src="docs/assets/data_explorer_sql.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="SQL Console View"/>
 </p>
 
-### 📊 4. Dataset Catalog & Quality Assurance
+### 📊 7. Dataset Catalog & Quality Assurance
 Inspect coverage dates, row counts, and auto-calculated **Quality Scores** (evaluating missing bars, null values, and OHLCV logical consistency) to ensure your data is production-ready.
 
 <p align="center">
@@ -57,11 +78,32 @@ Inspect coverage dates, row counts, and auto-calculated **Quality Scores** (eval
 
 ---
 
-## 🐍 Python Quant SDK
+## 📥 Consolidated CSV Export
 
-Read and query data directly in Python without running any database servers.
+Clicking the **"Exporter en CSV"** button exports a single, fully consolidated CSV file that blends both market price action and fundamental corporate metrics.
+
+### What the CSV Contains:
+The exported CSV aligns daily price bars with quarterly fundamentals using a strict `backward-fill` join, meaning quarterly numbers are carried forward daily until a new report is released. This provides a complete matrix for backtesting or machine learning features:
+- `date` & `symbol` (UTC aligned)
+- `open`, `high`, `low`, `close`, `volume`
+- `realized_vol_30d` & `implied_vol`
+- `pe_ratio`, `price_to_book`, `beta_raw`, `beta_adj`
+- `revenue`, `net_income`, `eps`, `cash`, `free_cash_flow`
+
+---
+
+## 🐍 Python Quant SDK & Local Database Link
+
+You can link your python code directly to the local data files without launching any database engines. The SDK leverages DuckDB to query Parquet files on disk at CPU-bound speeds.
+
+### How to Link Your Local Files:
+Simply install the requirements and set the `OPENTICK_DATA_ROOT` environment variable in your script pointing to your `opentick-data` directory.
 
 ```python
+import os
+# Configure the path to your data folder (containing lake/, bloomberg/, catalog.db)
+os.environ["OPENTICK_DATA_ROOT"] = "C:/Users/DELL/Desktop/opentick-data"
+
 from tvdata import get_ohlcv, get_macro, get_fundamentals, sql
 
 # ─── Load OHLCV Data (Stocks, Forex, Crypto) ─────────────────────
@@ -184,7 +226,7 @@ OpenTick stores data in columnar Parquet files on disk and runs queries in-proce
 - **DuckDB**: Fast, serverless analytical engine designed for SQL queries on columnar data.
 - **Hive Partitioning**: `asset_class/timeframe/symbol` structure guarantees sub-10ms query execution times by pruning irrelevant directories before scanning.
 - **SQLite Catalog**: Light, local registry storing data indices, symbol profiles, and data quality metrics.
-- **Strict UTC Normalization**: Ingestion connectors enforce timezone normalization to ensure exact cross-asset timing alignment.
+- **Strict UTC Timezone Normalization**: Ingestion connectors enforce timezone normalization to ensure exact cross-asset timing alignment.
 
 ---
 
