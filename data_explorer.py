@@ -802,7 +802,6 @@ def index(response: Response):
         </script>
     </head>
     <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
-
         <!-- Top Header -->
         <header class="border-b border-slate-800 bg-slate-950/70 backdrop-blur-lg sticky top-0 z-50 px-6 py-4 flex items-center justify-between shadow-md shadow-slate-950/50">
             <div class="flex items-center space-x-3">
@@ -829,7 +828,7 @@ def index(response: Response):
             <div class="flex items-center space-x-4">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-inner">
                     <span class="w-2 h-2 mr-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    Lake Connecté
+                    Data Lake Connected
                 </span>
                 <span class="text-xs font-mono text-slate-500 bg-slate-900 border border-slate-800/80 px-2.5 py-1 rounded-lg">localhost:8001</span>
             </div>
@@ -846,20 +845,21 @@ def index(response: Response):
                     <div class="space-y-4">
                         <!-- Asset Class -->
                         <div>
-                            <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Classe d'Actif</label>
+                            <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Asset Class</label>
                             <select id="asset-class" onchange="onAssetClassChange()" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
-                                <option value="stocks">Stocks (Actions US)</option>
-                                <option value="forex">Forex (Devises)</option>
-                                <option value="crypto">Crypto (Monnaies)</option>
-                                <option value="macro">Macro & FRED (Économie)</option>
+                                <option value="stocks">Stocks (US Equities)</option>
+                                <option value="forex">Forex (Currencies)</option>
+                                <option value="crypto">Crypto (Cryptocurrencies)</option>
+                                <option value="macro">Macro & FRED (Economy)</option>
                             </select>
                         </div>
 
                         <!-- Symbol -->
                         <div class="relative">
-                            <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Symbole</label>
-                            <div class="relative">
-                                <input type="text" id="symbol-search" placeholder="Rechercher un symbole..." onclick="toggleSymbolDropdown(true)" oninput="filterSymbols()" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg px-3 py-2 pr-8 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 cursor-pointer">
+                            <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Symbol</label>
+                            <div class="relative flex items-center">
+                                <div id="active-symbol-logo-container" class="absolute left-2.5 flex items-center justify-center hidden"></div>
+                                <input type="text" id="symbol-search" placeholder="Search symbol..." onclick="toggleSymbolDropdown(true)" oninput="filterSymbols()" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg pl-3 pr-8 py-2 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 cursor-pointer">
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-slate-500">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -883,57 +883,57 @@ def index(response: Response):
                         <!-- Price adjustments -->
                         <div class="flex items-center space-x-2.5 pt-1" id="adjustment-container">
                             <input type="checkbox" id="adjusted-prices" onchange="loadChartData()" checked class="rounded border-slate-800 text-emerald-500 bg-slate-900 focus:ring-emerald-500/30 focus:ring-offset-slate-950">
-                            <label for="adjusted-prices" class="text-xs text-slate-400 select-none cursor-pointer hover:text-slate-300">Appliquer les ajustements (splits/div)</label>
+                            <label for="adjusted-prices" class="text-xs text-slate-400 select-none cursor-pointer hover:text-slate-300">Apply price adjustments (splits/div)</label>
                         </div>
                     </div>
                 </div>
 
                 <!-- Database Statistics -->
                 <div class="border-t border-slate-900 pt-6 space-y-3 text-xs">
-                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Statistiques S&P 500</h2>
+                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-500">S&P 500 Statistics</h2>
                     <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-900 space-y-2.5 shadow-md shadow-slate-950/20">
                         <div class="flex justify-between items-center">
                             <span class="text-slate-400">Total Index Tickers</span>
                             <span id="stats-total" class="font-bold text-slate-200 font-mono">-</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-slate-400">Importés localement</span>
+                            <span class="text-slate-400">Locally Imported</span>
                             <span id="stats-imported" class="font-bold text-emerald-400 font-mono">-</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-slate-400">Non importés</span>
+                            <span class="text-slate-400">Not Imported</span>
                             <span id="stats-missing" class="font-bold text-rose-400 font-mono">-</span>
                         </div>
                         <div class="flex justify-between items-center border-t border-slate-800/50 pt-2 text-[10px]">
-                            <span class="text-slate-500">Dernière Sync</span>
-                            <span id="sync-status-time" class="text-slate-400 font-semibold font-mono">En attente...</span>
+                            <span class="text-slate-500">Last Sync</span>
+                            <span id="sync-status-time" class="text-slate-400 font-semibold font-mono">Waiting...</span>
                         </div>
                         <div class="pt-2">
                             <button id="update-all-btn" onclick="triggerUpdateAll()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-2 px-3 rounded-lg transition-all duration-300 shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] text-xs flex items-center justify-center space-x-1.5">
-                                <span>Actualiser la base (EOD)</span>
+                                <span>Refresh Database (EOD)</span>
                             </button>
                         </div>
                         
                         <!-- Progress Tracking Section -->
                         <div id="ingest-progress-container" class="border-t border-slate-800/50 pt-2.5 mt-2 hidden space-y-2">
                             <div class="flex justify-between text-[10px]">
-                                <span id="progress-step-name" class="font-semibold text-slate-400">Actualisation</span>
+                                <span id="progress-step-name" class="font-semibold text-slate-400">Refreshing</span>
                                 <span id="progress-percent" class="font-bold text-emerald-400">0%</span>
                             </div>
                             <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
                                 <div id="progress-bar-fill" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full transition-all duration-300 w-0"></div>
                             </div>
-                            <div id="progress-status" class="text-[9px] text-slate-500 truncate">Vérification de AAPL...</div>
+                            <div id="progress-status" class="text-[9px] text-slate-500 truncate">Verifying AAPL...</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Live Ingestion Form -->
                 <div class="border-t border-slate-900 pt-6 space-y-4 text-xs">
-                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Importer / Mettre à jour</h2>
+                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Import / Update</h2>
                     <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-900 space-y-3.5 shadow-md shadow-slate-950/20">
                         <div>
-                            <label class="block text-[10px] font-medium text-slate-400 mb-1">Source API</label>
+                            <label class="block text-[10px] font-medium text-slate-400 mb-1">API Source</label>
                             <select id="ingest-source" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-300 focus:outline-none focus:border-emerald-500/50 transition-all duration-200">
                                 <option value="alpaca">Alpaca Markets (M15+)</option>
                                 <option value="yfinance">Yahoo Finance</option>
@@ -942,16 +942,16 @@ def index(response: Response):
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-[10px] font-medium text-slate-400 mb-1">Date Début</label>
+                                <label class="block text-[10px] font-medium text-slate-400 mb-1">Start Date</label>
                                 <input type="date" id="ingest-start" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg px-2 py-1 text-slate-300 focus:outline-none focus:border-emerald-500/50 transition-all duration-200">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-medium text-slate-400 mb-1">Date Fin</label>
+                                <label class="block text-[10px] font-medium text-slate-400 mb-1">End Date</label>
                                 <input type="date" id="ingest-end" class="w-full bg-slate-900/60 border border-slate-800 rounded-lg px-2 py-1 text-slate-300 focus:outline-none focus:border-emerald-500/50 transition-all duration-200">
                             </div>
                         </div>
                         <button id="ingest-btn" onclick="triggerIngestion()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2 rounded-lg transition-all duration-300 shadow-md shadow-blue-500/10 hover:shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98]">
-                            <span id="ingest-btn-text">Lancer l'Import</span>
+                            <span id="ingest-btn-text">Start Ingestion</span>
                         </button>
                         <div id="ingest-status" class="text-[10px] text-center font-medium mt-1 hidden"></div>
                     </div>
@@ -959,19 +959,19 @@ def index(response: Response):
 
                 <!-- Metadata details -->
                 <div id="metadata-panel" class="border-t border-slate-900 pt-6 flex-1 flex flex-col space-y-4 text-xs">
-                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Métadonnées</h2>
+                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Metadata</h2>
                     <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-900 space-y-3 shadow-md shadow-slate-950/20">
                         <div>
-                            <div class="text-slate-500 text-[10px]">Nom Long</div>
+                            <div class="text-slate-500 text-[10px]">Long Name</div>
                             <div id="meta-longname" class="font-semibold text-slate-200">-</div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <div class="text-slate-500 text-[10px]">Secteur</div>
+                                <div class="text-slate-500 text-[10px]">Sector</div>
                                 <div id="meta-sector" class="font-semibold text-slate-200">-</div>
                             </div>
                             <div>
-                                <div class="text-slate-500 text-[10px]">Industrie</div>
+                                <div class="text-slate-500 text-[10px]">Industry</div>
                                 <div id="meta-industry" class="font-semibold text-slate-200">-</div>
                             </div>
                         </div>
@@ -981,19 +981,19 @@ def index(response: Response):
                                 <div id="meta-marketcap" class="font-semibold text-slate-200">-</div>
                             </div>
                             <div>
-                                <div class="text-slate-500 text-[10px]">Poids Indice</div>
+                                <div class="text-slate-500 text-[10px]">Index Weight</div>
                                 <div id="meta-weight" class="font-semibold text-slate-200">-</div>
                             </div>
                         </div>
                         <div>
-                            <div class="text-slate-500 text-[10px]">Bourse</div>
+                            <div class="text-slate-500 text-[10px]">Exchange</div>
                             <div id="meta-exchange" class="font-semibold text-slate-200">-</div>
                         </div>
                     </div>
                     <div class="flex-1 flex flex-col overflow-hidden">
-                        <div class="text-slate-500 text-[10px] mb-1.5 font-medium">Résumé de l'activité</div>
+                        <div class="text-slate-500 text-[10px] mb-1.5 font-medium">Business Summary</div>
                         <div id="meta-summary" class="bg-slate-950/60 p-4 rounded-xl border border-slate-900 overflow-y-auto text-slate-400 leading-relaxed max-h-48 shadow-inner">
-                            Pas de description commerciale disponible.
+                            No business summary available.
                         </div>
                     </div>
                 </div>
@@ -1004,6 +1004,7 @@ def index(response: Response):
                 <!-- Top chart panel -->
                 <div class="h-[460px] p-6 relative flex flex-col min-h-0 bg-gradient-to-b from-slate-900/20 to-slate-950">
                     <div id="chart-legend-wrapper" class="absolute top-8 left-8 z-10 bg-slate-950/85 border border-slate-800/80 px-4 py-2 rounded-xl backdrop-blur-lg flex items-center space-x-4 shadow-2xl shadow-slate-950/60 pointer-events-none text-xs select-none">
+                        <div id="chart-symbol-logo" class="flex items-center justify-center"></div>
                         <div id="chart-symbol-label" class="text-sm font-bold text-white">-</div>
                         <div id="chart-price-label" class="text-sm font-semibold text-emerald-400 font-mono">-</div>
                         <div id="chart-ohlcv-legend" class="text-[11px] text-slate-400 font-mono hidden space-x-3">
@@ -1013,7 +1014,7 @@ def index(response: Response):
                     <div class="absolute top-8 right-8 z-10 flex space-x-2">
                         <button onclick="downloadCSV()" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800 px-4 py-2 rounded-xl text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center space-x-2 transition-all duration-300 hover:scale-[1.02] shadow-xl shadow-slate-950/50">
                             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            <span>Exporter en CSV</span>
+                            <span>Export to CSV</span>
                         </button>
                     </div>
                     <div id="chart-container" class="w-full flex-1 rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-950/80 shadow-2xl shadow-slate-950/40">
@@ -1025,10 +1026,10 @@ def index(response: Response):
                 <div class="flex-1 border-t border-slate-900 bg-slate-950/30 flex flex-col overflow-hidden">
                     <div class="border-b border-slate-900 px-6 py-2 flex items-center justify-between bg-slate-950/50">
                         <div class="flex items-center space-x-6">
-                            <button id="tab-financials-btn" onclick="switchTab('financials')" class="text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 pb-3 pt-3 focus:outline-none transition-colors duration-200">Données Financières</button>
-                            <button id="tab-table-btn" onclick="switchTab('table')" class="text-sm font-semibold text-slate-400 hover:text-slate-200 pb-3 pt-3 focus:outline-none transition-colors duration-200">Données OHLCV (Tableau)</button>
-                            <button id="tab-catalog-btn" onclick="switchTab('catalog')" class="text-sm font-semibold text-slate-400 hover:text-slate-200 pb-3 pt-3 focus:outline-none transition-colors duration-200">Infos Dataset Catalogue</button>
-                            <button id="tab-sql-btn" onclick="switchTab('sql')" class="text-sm font-semibold text-slate-400 hover:text-slate-200 pb-3 pt-3 focus:outline-none transition-colors duration-200">Console SQL (DuckDB)</button>
+                            <button id="tab-financials-btn" onclick="switchTab('financials')" class="text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 pb-3 pt-3 focus:outline-none transition-colors duration-200">Financial Data</button>
+                            <button id="tab-table-btn" onclick="switchTab('table')" class="text-sm font-semibold text-slate-400 hover:text-slate-200 pb-3 pt-3 focus:outline-none transition-colors duration-200">OHLCV Data (Table)</button>
+                            <button id="tab-catalog-btn" onclick="switchTab('catalog')" class="text-sm font-semibold text-slate-400 hover:text-slate-200 pb-3 pt-3 focus:outline-none transition-colors duration-200">Dataset Catalog Info</button>
+                            <button id="tab-sql-btn" onclick="switchTab('sql')" class="text-sm font-semibold text-slate-400 hover:text-slate-200 pb-3 pt-3 focus:outline-none transition-colors duration-200">SQL Console (DuckDB)</button>
                         </div>
                         <div id="table-row-count" class="text-xs text-slate-500 font-mono"></div>
                     </div>
@@ -1040,13 +1041,13 @@ def index(response: Response):
                                 <table class="w-full text-left border-collapse text-xs">
                                     <thead>
                                         <tr class="border-b border-slate-800 text-slate-400 font-semibold">
-                                            <th class="py-2 px-3">Date Rapport</th>
-                                            <th class="py-2 px-3">Période</th>
-                                            <th class="py-2 px-3 text-right">Revenu ($)</th>
-                                            <th class="py-2 px-3 text-right">Résultat Net ($)</th>
+                                            <th class="py-2 px-3">Report Date</th>
+                                            <th class="py-2 px-3">Period</th>
+                                            <th class="py-2 px-3 text-right">Revenue ($)</th>
+                                            <th class="py-2 px-3 text-right">Net Income ($)</th>
                                             <th class="py-2 px-3 text-right">EPS ($)</th>
                                             <th class="py-2 px-3 text-right">Cash ($)</th>
-                                            <th class="py-2 px-3 text-right">Cash Flow Op. ($)</th>
+                                            <th class="py-2 px-3 text-right">Op. Cash Flow ($)</th>
                                             <th class="py-2 px-3 text-right">Free Cash Flow ($)</th>
                                         </tr>
                                     </thead>
@@ -1055,7 +1056,7 @@ def index(response: Response):
                                     </tbody>
                                 </table>
                                 <div id="financials-empty" class="text-center py-8 text-slate-500 text-sm hidden">
-                                    Aucune donnée financière disponible pour ce symbole.
+                                    No financial data available for this symbol.
                                 </div>
                             </div>
                         </div>
@@ -1079,7 +1080,7 @@ def index(response: Response):
                                     </tbody>
                                 </table>
                                 <div id="table-empty" class="text-center py-8 text-slate-500 text-sm">
-                                    Aucune donnée de marché chargée dans l'onglet.
+                                    No market data loaded in this tab.
                                 </div>
                             </div>
                         </div>
@@ -1088,19 +1089,19 @@ def index(response: Response):
                         <div id="tab-catalog" class="hidden">
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
                                 <div>
-                                    <div class="text-slate-500 text-xs">Période disponible</div>
+                                    <div class="text-slate-500 text-xs">Available Period</div>
                                     <div id="cat-range" class="font-semibold text-slate-200 mt-1">-</div>
                                 </div>
                                 <div>
-                                    <div class="text-slate-500 text-xs">Nombre de Lignes</div>
+                                    <div class="text-slate-500 text-xs">Number of Rows</div>
                                     <div id="cat-rows" class="font-semibold text-slate-200 mt-1">-</div>
                                 </div>
                                 <div>
-                                    <div class="text-slate-500 text-xs">Taux de Nulls (Price)</div>
+                                    <div class="text-slate-500 text-xs">Nulls Rate (Price)</div>
                                     <div id="cat-nulls" class="font-semibold text-slate-200 mt-1">-</div>
                                 </div>
                                 <div>
-                                    <div class="text-slate-500 text-xs">Score de Qualité</div>
+                                    <div class="text-slate-500 text-xs">Quality Score</div>
                                     <div id="cat-quality" class="font-semibold mt-1">-</div>
                                 </div>
                             </div>
@@ -1110,15 +1111,15 @@ def index(response: Response):
                         <div id="tab-sql" class="hidden w-full flex flex-col space-y-4 h-full">
                             <div class="flex space-x-4 items-stretch">
                                 <div class="flex-1">
-                                    <textarea id="sql-query-input" rows="3" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded-lg p-3 font-mono text-xs focus:outline-none focus:border-blue-500" placeholder="Saisissez votre requête SQL ici...">SELECT timestamp, open, high, low, close, volume FROM ohlcv WHERE symbol = 'AAPL' AND timeframe = 'D1' ORDER BY timestamp DESC LIMIT 5;</textarea>
+                                    <textarea id="sql-query-input" rows="3" class="w-full bg-slate-950 text-slate-200 border border-slate-800 rounded-lg p-3 font-mono text-xs focus:outline-none focus:border-blue-500" placeholder="Enter your SQL query here...">SELECT timestamp, open, high, low, close, volume FROM ohlcv WHERE symbol = 'AAPL' AND timeframe = 'D1' ORDER BY timestamp DESC LIMIT 5;</textarea>
                                 </div>
                                 <div class="flex flex-col justify-between">
                                     <button onclick="runSqlQuery()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition h-10 flex items-center justify-center space-x-1 shadow-md shadow-blue-500/20">
-                                        <span>Exécuter SQL</span>
+                                        <span>Execute SQL</span>
                                     </button>
                                     <div class="text-[10px] text-slate-500 max-w-[150px] leading-tight">
-                                        Tables disponibles : <br>
-                                        <code class="text-blue-400 font-mono">ohlcv</code> (données OHLCV)<br>
+                                        Available tables: <br>
+                                        <code class="text-blue-400 font-mono">ohlcv</code> (OHLCV data)<br>
                                         <code class="text-blue-400 font-mono">parquet_scan('path')</code>
                                     </div>
                                 </div>
@@ -1126,27 +1127,27 @@ def index(response: Response):
                             
                             <!-- Exemples de requêtes SQL rapides -->
                             <div class="flex flex-wrap gap-2 text-[10px] text-slate-400 pb-2">
-                                <span class="self-center font-medium mr-1">Exemples :</span>
+                                <span class="self-center font-medium mr-1">Examples:</span>
                                 <button onclick="prefillSQL('SELECT timestamp, open, high, low, close, volume FROM ohlcv WHERE symbol = \\'AAPL\\' AND timeframe = \\'D1\\' ORDER BY timestamp DESC LIMIT 10;')" class="bg-slate-850 hover:bg-slate-800 text-slate-300 px-2.5 py-1 rounded border border-slate-800 hover:border-slate-700 transition">OHLCV AAPL Daily</button>
-                                <button onclick="prefillSQL('SELECT symbol, sector, industry, marketcap FROM symbols_metadata WHERE sector = \\'Technology\\' ORDER BY marketcap DESC LIMIT 5;')" class="bg-slate-850 hover:bg-slate-800 text-slate-300 px-2.5 py-1 rounded border border-slate-800 hover:border-slate-700 transition">Top Tech par Market Cap</button>
-                                <button onclick="prefillSQL('SELECT symbol, DATE as date, Realized_Vol_30D as volatility FROM parquet_scan(\\'c:/Users/DELL/Desktop/Tradovera/lake/bloomberg/volatility.parquet\\') WHERE symbol = \\'AAPL\\' ORDER BY DATE DESC LIMIT 5;')" class="bg-slate-855 hover:bg-slate-800 text-amber-400 px-2.5 py-1 rounded border border-amber-900/30 hover:border-amber-700/50 transition">Volatilité Bloomberg AAPL</button>
-                                <button onclick="prefillSQL('SELECT symbol, DATE as date, PE_Ratio as pe, Price_to_Book as pb FROM parquet_scan(\\'c:/Users/DELL/Desktop/Tradovera/lake/bloomberg/fundamentals.parquet\\') WHERE symbol = \\'AAPL\\' ORDER BY DATE DESC LIMIT 5;')" class="bg-slate-855 hover:bg-slate-800 text-amber-400 px-2.5 py-1 rounded border border-amber-900/30 hover:border-amber-700/50 transition">Multiples Bloomberg AAPL</button>
+                                <button onclick="prefillSQL('SELECT symbol, sector, industry, marketcap FROM symbols_metadata WHERE sector = \\'Technology\\' ORDER BY marketcap DESC LIMIT 5;')" class="bg-slate-850 hover:bg-slate-800 text-slate-300 px-2.5 py-1 rounded border border-slate-800 hover:border-slate-700 transition">Top Tech by Market Cap</button>
+                                <button onclick="prefillSQL('SELECT symbol, DATE as date, Realized_Vol_30D as volatility FROM parquet_scan(\\'c:/Users/DELL/Desktop/Tradovera/lake/bloomberg/volatility.parquet\\') WHERE symbol = \\'AAPL\\' ORDER BY DATE DESC LIMIT 5;')" class="bg-slate-855 hover:bg-slate-800 text-amber-400 px-2.5 py-1 rounded border border-amber-900/30 hover:border-amber-700/50 transition">Bloomberg Volatility AAPL</button>
+                                <button onclick="prefillSQL('SELECT symbol, DATE as date, PE_Ratio as pe, Price_to_Book as pb FROM parquet_scan(\\'c:/Users/DELL/Desktop/Tradovera/lake/bloomberg/fundamentals.parquet\\') WHERE symbol = \\'AAPL\\' ORDER BY DATE DESC LIMIT 5;')" class="bg-slate-855 hover:bg-slate-800 text-amber-400 px-2.5 py-1 rounded border border-amber-900/30 hover:border-amber-700/50 transition">Bloomberg Multiples AAPL</button>
                             </div>
                             
                             <div class="flex-1 overflow-auto border border-slate-800 rounded-lg bg-slate-950 min-h-0 relative">
                                 <div id="sql-empty-state" class="absolute inset-0 flex items-center justify-center text-slate-500 text-xs">
-                                    Cliquez sur Exécuter pour lancer la requête SQL sur le lac de données.
+                                    Click Execute to run SQL query on the data lake.
                                 </div>
                                 <div id="sql-loading-state" class="absolute inset-0 flex items-center justify-center text-slate-400 text-xs hidden space-x-2">
                                     <svg class="animate-spin h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                    <span>Exécution de la requête sur DuckDB...</span>
+                                    <span>Running query on DuckDB...</span>
                                 </div>
                                 <div id="sql-result-container" class="hidden p-3 w-full">
                                     <div class="flex justify-between items-center text-[10px] text-slate-500 mb-2 border-b border-slate-900 pb-2">
                                         <span id="sql-result-info"></span>
                                         <button onclick="downloadSQLResultCSV()" class="text-blue-400 hover:text-blue-300 font-semibold flex items-center space-x-1">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                            <span>Exporter le résultat (CSV)</span>
+                                            <span>Export Result (CSV)</span>
                                         </button>
                                     </div>
                                     <div class="overflow-x-auto w-full">
@@ -1177,19 +1178,19 @@ def index(response: Response):
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
                 
-                <h3 class="text-lg font-bold text-white mb-0.5">Configuration de l'Export</h3>
-                <p class="text-xs text-slate-400 mb-5">Exportation des données pour <span id="export-symbol-title" class="font-extrabold text-blue-400">-</span></p>
+                <h3 class="text-lg font-bold text-white mb-0.5">Export Configuration</h3>
+                <p class="text-xs text-slate-400 mb-5">Exporting data for <span id="export-symbol-title" class="font-extrabold text-blue-400">-</span></p>
                 
                 <!-- Date range selection -->
                 <div class="bg-[#050810]/60 p-4 rounded-xl border border-slate-900 mb-4 space-y-3 shadow-inner">
-                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Période d'exportation</div>
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Export Period</div>
                     <div class="grid grid-cols-2 gap-4 text-xs">
                         <div>
-                            <label class="block text-slate-400 mb-1.5 font-medium">Date Début</label>
+                            <label class="block text-slate-400 mb-1.5 font-medium">Start Date</label>
                             <input type="date" id="export-start-date" class="w-full bg-[#070b15] border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500 transition duration-150">
                         </div>
                         <div>
-                            <label class="block text-slate-400 mb-1.5 font-medium">Date Fin</label>
+                            <label class="block text-slate-400 mb-1.5 font-medium">End Date</label>
                             <input type="date" id="export-end-date" class="w-full bg-[#070b15] border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500 transition duration-150">
                         </div>
                     </div>
@@ -1197,15 +1198,15 @@ def index(response: Response):
 
                 <!-- Export Format Selection -->
                 <div class="bg-[#050810]/60 p-4 rounded-xl border border-slate-900 mb-4 space-y-3 shadow-inner">
-                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Format d'exportation</div>
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Export Format</div>
                     <div class="flex items-center space-x-6 text-xs pl-1">
                         <label class="flex items-center space-x-2 text-slate-300 cursor-pointer select-none">
                             <input type="radio" name="export-format" value="consolidated" checked class="w-4 h-4 border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
-                            <span class="font-medium">Fichier unique consolidé (CSV)</span>
+                            <span class="font-medium">Single Consolidated File (CSV)</span>
                         </label>
                         <label class="flex items-center space-x-2 text-slate-300 cursor-pointer select-none">
                             <input type="radio" name="export-format" value="separate" class="w-4 h-4 border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
-                            <span class="font-medium">Fichiers CSV séparés (ZIP)</span>
+                            <span class="font-medium">Separate CSV Files (ZIP)</span>
                         </label>
                     </div>
                 </div>
@@ -1217,10 +1218,10 @@ def index(response: Response):
                 
                 <div class="flex space-x-3 pt-4 border-t border-slate-900">
                     <button onclick="closeExportModal()" class="flex-1 bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 font-bold py-2.5 rounded-lg text-xs transition duration-150 active:scale-[0.98]">
-                        Annuler
+                        Cancel
                     </button>
                     <button id="modal-export-btn" onclick="executeExport()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-lg text-xs transition duration-150 flex items-center justify-center space-x-1.5 active:scale-[0.98] shadow-lg shadow-blue-500/25">
-                        <span id="modal-export-btn-text">Exporter</span>
+                        <span id="modal-export-btn-text">Export</span>
                     </button>
                 </div>
             </div>
@@ -1234,6 +1235,80 @@ def index(response: Response):
             let volumeSeries = null;
             let areaSeries = null;
             let currentData = []; // Holds currently loaded series data
+
+            // Dynamic Brand & Crypto Logo definitions (similar to TradingView)
+            function getSymbolLogoHtml(symbol, name = '', assetClass = 'stocks') {
+                symbol = symbol.toUpperCase().trim();
+                const stockDomains = {
+                    'AAPL': 'apple.com',
+                    'MSFT': 'microsoft.com',
+                    'GOOGL': 'google.com',
+                    'GOOG': 'google.com',
+                    'NVDA': 'nvidia.com',
+                    'AMZN': 'amazon.com',
+                    'TSLA': 'tesla.com',
+                    'META': 'meta.com',
+                    'NFLX': 'netflix.com',
+                    'AMD': 'amd.com',
+                    'INTC': 'intel.com',
+                    'QCOM': 'qualcomm.com',
+                    'PYPL': 'paypal.com',
+                    'COIN': 'coinbase.com',
+                    'DIS': 'disney.com',
+                    'NKE': 'nike.com',
+                    'SBUX': 'starbucks.com'
+                };
+                
+                const cryptoLogos = {
+                    'BTC': 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+                    'ETH': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+                    'BNB': 'https://assets.coingecko.com/coins/images/825/small/binance-coin-logo.png',
+                    'SOL': 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
+                    'XRP': 'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
+                    'ADA': 'https://assets.coingecko.com/coins/images/975/small/cardano.png'
+                };
+                
+                const forexFlags = {
+                    'EUR': 'https://flagcdn.com/w40/eu.png',
+                    'USD': 'https://flagcdn.com/w40/us.png',
+                    'GBP': 'https://flagcdn.com/w40/gb.png',
+                    'JPY': 'https://flagcdn.com/w40/jp.png',
+                    'CHF': 'https://flagcdn.com/w40/ch.png',
+                    'CAD': 'https://flagcdn.com/w40/ca.png',
+                    'AUD': 'https://flagcdn.com/w40/au.png'
+                };
+
+                if (assetClass === 'crypto' && cryptoLogos[symbol]) {
+                    return `<img src="${cryptoLogos[symbol]}" class="w-5 h-5 rounded-full object-cover bg-slate-800 border border-slate-700/50" alt="${symbol}">`;
+                }
+
+                if (assetClass === 'forex') {
+                    const baseCurr = symbol.substring(0, 3);
+                    if (forexFlags[baseCurr]) {
+                        return `<img src="${forexFlags[baseCurr]}" class="w-5 h-3.5 rounded object-cover border border-slate-700/50 shadow-inner" alt="${symbol}">`;
+                    }
+                }
+
+                if (assetClass === 'stocks') {
+                    const domain = stockDomains[symbol];
+                    if (domain) {
+                        return `<img src="https://logo.clearbit.com/${domain}" class="w-5 h-5 rounded-full object-contain bg-white border border-slate-700/30 p-0.5" onerror="this.outerHTML=getLetterAvatarHtml('${symbol}')" alt="${symbol}">`;
+                    }
+                }
+
+                return getLetterAvatarHtml(symbol);
+            }
+
+            function getLetterAvatarHtml(symbol) {
+                let hash = 0;
+                for (let i = 0; i < symbol.length; i++) {
+                    hash = symbol.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const hue = Math.abs(hash % 360);
+                const bg = `linear-gradient(135deg, hsl(${hue}, 85%, 35%), hsl(${(hue + 60) % 360}, 85%, 20%))`;
+                const initials = symbol.substring(0, 2);
+                return `<div class="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white tracking-wider border border-white/10 shadow-lg" style="background: ${bg};">${initials}</div>`;
+            }
 
             // Load symbol dataset metadata on startup
             window.addEventListener('DOMContentLoaded', async () => {
@@ -1637,7 +1712,25 @@ def index(response: Response):
 
             function selectSymbol(symbol, label, triggerChange = true) {
                 document.getElementById('symbol').value = symbol;
-                document.getElementById('symbol-search').value = label || symbol;
+                const assetClass = document.getElementById('asset-class').value;
+                const cleanLabel = label || symbol;
+                document.getElementById('symbol-search').value = cleanLabel;
+
+                // Update active logo in search bar
+                const logoContainer = document.getElementById('active-symbol-logo-container');
+                const searchInput = document.getElementById('symbol-search');
+                const chartLogo = document.getElementById('chart-symbol-logo');
+
+                if (logoContainer && searchInput) {
+                    logoContainer.innerHTML = getSymbolLogoHtml(symbol, cleanLabel, assetClass);
+                    logoContainer.classList.remove('hidden');
+                    searchInput.style.paddingLeft = '2.25rem';
+                }
+
+                if (chartLogo) {
+                    chartLogo.innerHTML = getSymbolLogoHtml(symbol, cleanLabel, assetClass);
+                }
+
                 if (triggerChange) {
                     onSymbolChange();
                 }
@@ -1648,17 +1741,24 @@ def index(response: Response):
                 dropdown.innerHTML = '';
                 
                 if (items.length === 0) {
-                    dropdown.innerHTML = '<div class="px-3 py-2 text-xs text-slate-500">Aucun symbole trouvé</div>';
+                    dropdown.innerHTML = '<div class="px-3 py-2 text-xs text-slate-500">No symbol found</div>';
                     return;
                 }
                 
                 const selectedVal = document.getElementById('symbol').value;
+                const assetClass = document.getElementById('asset-class').value;
                 
                 items.forEach(item => {
                     const isSelected = item.symbol === selectedVal;
                     const div = document.createElement('div');
-                    div.className = `px-3 py-2 text-xs cursor-pointer select-none hover:bg-blue-600 hover:text-white transition duration-100 ${isSelected ? 'bg-blue-600/35 text-blue-300 font-semibold' : 'text-slate-300'}`;
-                    div.innerText = item.label;
+                    div.className = `flex items-center space-x-2.5 px-3 py-2 text-xs cursor-pointer select-none hover:bg-blue-600 hover:text-white transition duration-100 ${isSelected ? 'bg-blue-600/35 text-blue-300 font-semibold' : 'text-slate-300'}`;
+                    
+                    const logoHtml = getSymbolLogoHtml(item.symbol, item.label, assetClass);
+                    div.innerHTML = `
+                        <div class="flex-shrink-0 flex items-center justify-center">${logoHtml}</div>
+                        <span class="truncate font-medium">${item.label}</span>
+                    `;
+                    
                     div.onclick = () => {
                         selectSymbol(item.symbol, item.label, true);
                         toggleSymbolDropdown(false);
@@ -1685,23 +1785,30 @@ def index(response: Response):
 
             function toggleSymbolDropdown(show) {
                 const dropdown = document.getElementById('symbol-dropdown');
+                const logoContainer = document.getElementById('active-symbol-logo-container');
+                const searchInput = document.getElementById('symbol-search');
+
                 if (show) {
                     dropdown.classList.remove('hidden');
-                    // Show all options initially when dropdown is opened
                     renderSymbolOptions(currentAssetClassSymbols);
-                    // Select all text in the search box so user can immediately type over it
-                    const searchInput = document.getElementById('symbol-search');
-                    if (searchInput) {
+                    
+                    if (logoContainer && searchInput) {
+                        logoContainer.classList.add('hidden');
+                        searchInput.style.paddingLeft = '0.75rem';
                         searchInput.select();
                     }
                 } else {
                     setTimeout(() => {
                         dropdown.classList.add('hidden');
-                        // Restore the selected symbol label if they click away
                         const selectedVal = document.getElementById('symbol').value;
                         const match = currentAssetClassSymbols.find(item => item.symbol === selectedVal);
                         if (match) {
-                            document.getElementById('symbol-search').value = match.label;
+                            searchInput.value = match.label;
+                            if (logoContainer && searchInput) {
+                                logoContainer.innerHTML = getSymbolLogoHtml(match.symbol, match.label, document.getElementById('asset-class').value);
+                                logoContainer.classList.remove('hidden');
+                                searchInput.style.paddingLeft = '2.25rem';
+                            }
                         }
                     }, 200);
                 }
@@ -1751,6 +1858,10 @@ def index(response: Response):
                 
                 // Update headers, meta, financials
                 document.getElementById('chart-symbol-label').innerText = symbol;
+                const chartLogo = document.getElementById('chart-symbol-logo');
+                if (chartLogo) {
+                    chartLogo.innerHTML = getSymbolLogoHtml(symbol, symbol, assetClass);
+                }
                 document.getElementById('chart-price-label').innerText = "";
                 
                 const meta = allSymbols.find(s => s.symbol === symbol && s.asset_class === assetClass) || {};
@@ -2060,16 +2171,16 @@ def index(response: Response):
                     } else {
                         // 1. OHLCV timeframes grouped under subheader
                         if (status.ohlcv && status.ohlcv.length > 0) {
-                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-2 mb-1.5">SÉRIES DE COURS (OHLCV)</div>`;
+                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-2 mb-1.5">PRICE SERIES (OHLCV)</div>`;
                             status.ohlcv.forEach(tf => {
                                 const tfLabel = tf === 'D1' ? 'Daily (D1)' 
-                                              : tf === '4h' ? '4 Heures (4h)' 
-                                              : tf === '1h' ? '1 Heure (1h)' 
+                                              : tf === '4h' ? '4 Hours (4h)' 
+                                              : tf === '1h' ? '1 Hour (1h)' 
                                               : tf === '15m' ? '15 Minutes (15m)' 
                                               : tf === '5m' ? '5 Minutes (5m)' 
                                               : tf === '1m' ? '1 Minute (1m)' 
-                                              : tf === '1W' ? 'Hebdomadaire (1W)' 
-                                              : tf === '1M' ? 'Mensuel (1M)' 
+                                              : tf === '1W' ? 'Weekly (1W)' 
+                                              : tf === '1M' ? 'Monthly (1M)' 
                                               : tf;
                                 const isDefault = (tf === (document.getElementById('timeframe') ? document.getElementById('timeframe').value : 'D1'));
                                 html += `
@@ -2077,7 +2188,7 @@ def index(response: Response):
                                         <input type="checkbox" name="export-item" value="ohlcv_${tf}" ${isDefault ? 'checked' : ''} class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
                                         <div>
                                             <div class="text-xs font-bold text-slate-200">${tfLabel}</div>
-                                            <div class="text-[10px] text-slate-500 font-medium">Prix et Volumes</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Prices & Volumes</div>
                                         </div>
                                     </label>
                                 `;
@@ -2088,14 +2199,14 @@ def index(response: Response):
                         if (status.financials.income || status.financials.balance || status.financials.cashflow) {
                             html += `
                                 <div class="p-4 rounded-xl bg-[#050810]/60 border border-slate-900 space-y-3 col-span-1 sm:col-span-2 mt-2 shadow-inner">
-                                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-900 pb-1.5">Données Financières (États)</div>
+                                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-900 pb-1.5">Financial Data (Statements)</div>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-1">
                             `;
                             if (status.financials.income) {
                                 html += `
                                     <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer select-none">
                                         <input type="checkbox" name="export-item" value="fin_income" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
-                                        <span class="font-medium">Compte de résultat (Revenus, EPS...)</span>
+                                        <span class="font-medium">Income Statement (Revenue, EPS...)</span>
                                     </label>
                                 `;
                             }
@@ -2103,7 +2214,7 @@ def index(response: Response):
                                 html += `
                                     <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer select-none">
                                         <input type="checkbox" name="export-item" value="fin_balance" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
-                                        <span class="font-medium">Bilan Comptable (Actifs, Dette...)</span>
+                                        <span class="font-medium">Balance Sheet (Assets, Debt...)</span>
                                     </label>
                                 `;
                             }
@@ -2111,7 +2222,7 @@ def index(response: Response):
                                 html += `
                                     <label class="flex items-center space-x-2.5 text-xs text-slate-300 cursor-pointer select-none">
                                         <input type="checkbox" name="export-item" value="fin_cashflow" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
-                                        <span class="font-medium">Flux de Trésorerie (FCF, Operating CF...)</span>
+                                        <span class="font-medium">Cash Flow Statement (FCF, Operating CF...)</span>
                                     </label>
                                 `;
                             }
@@ -2123,15 +2234,15 @@ def index(response: Response):
 
                         // 3. Volatility, Options & Corporate Actions
                         if (status.volatility || status.options || status.corporate_actions) {
-                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-4 mb-1.5">VOLATILITÉ & DÉRIVÉS</div>`;
+                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-4 mb-1.5">VOLATILITY & DERIVATIVES</div>`;
                             
                             if (status.volatility) {
                                 html += `
                                     <label class="flex items-center space-x-3.5 p-3.5 rounded-lg bg-[#070b15] border border-slate-900/60 hover:border-slate-800 transition cursor-pointer select-none col-span-1 shadow-md shadow-slate-950/20">
                                         <input type="checkbox" name="export-item" value="volatility" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
                                         <div>
-                                            <div class="text-xs font-bold text-slate-200">Volatilité Optionnelle</div>
-                                            <div class="text-[10px] text-slate-500 font-medium">HV / IV historiques des options</div>
+                                            <div class="text-xs font-bold text-slate-200">Option Volatility</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Historical HV / IV from options</div>
                                         </div>
                                     </label>
                                 `;
@@ -2141,8 +2252,8 @@ def index(response: Response):
                                     <label class="flex items-center space-x-3.5 p-3.5 rounded-lg bg-[#070b15] border border-slate-900/60 hover:border-slate-800 transition cursor-pointer select-none col-span-1 shadow-md shadow-slate-950/20">
                                         <input type="checkbox" name="export-item" value="options" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
                                         <div>
-                                            <div class="text-xs font-bold text-slate-200">Chaîne d'Options</div>
-                                            <div class="text-[10px] text-slate-500 font-medium">Grecques et prix historiques</div>
+                                            <div class="text-xs font-bold text-slate-200">Option Chain</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Historical Greeks & prices</div>
                                         </div>
                                     </label>
                                 `;
@@ -2152,8 +2263,8 @@ def index(response: Response):
                                     <label class="flex items-center space-x-3.5 p-3.5 rounded-lg bg-[#070b15] border border-slate-900/60 hover:border-slate-800 transition cursor-pointer select-none col-span-1 sm:col-span-2 shadow-md shadow-slate-950/20">
                                         <input type="checkbox" name="export-item" value="corporate_actions" class="w-4 h-4 rounded border-slate-800 text-blue-600 bg-slate-950 focus:ring-blue-500/20">
                                         <div>
-                                            <div class="text-xs font-bold text-slate-200">Actions Corporate</div>
-                                            <div class="text-[10px] text-slate-500 font-medium">Historique des dividendes versés et splits</div>
+                                            <div class="text-xs font-bold text-slate-200">Corporate Actions</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Historical dividends and splits</div>
                                         </div>
                                     </label>
                                 `;
@@ -2162,15 +2273,15 @@ def index(response: Response):
 
                         // 4. Bloomberg Golden Data
                         if (status.bloomberg_fundamentals || status.bloomberg_volatility) {
-                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-amber-500 mt-4 mb-1.5">DONNÉES BLOOMBERG (GOLDEN)</div>`;
+                            html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-amber-500 mt-4 mb-1.5">BLOOMBERG GOLDEN DATA</div>`;
                             
                             if (status.bloomberg_fundamentals) {
                                 html += `
                                     <label class="flex items-center space-x-3.5 p-3.5 rounded-lg bg-[#070b15] border border-amber-950/20 hover:border-amber-900/40 transition cursor-pointer select-none col-span-1 sm:col-span-2 shadow-md shadow-slate-950/20">
                                         <input type="checkbox" name="export-item" value="bb_fundamentals" class="w-4 h-4 rounded border-amber-800/40 text-amber-600 bg-[#070b15] focus:ring-amber-500/20">
                                         <div>
-                                            <div class="text-xs font-bold text-amber-400 font-medium">Fondamentaux Mensuels (Bloomberg)</div>
-                                            <div class="text-[10px] text-slate-500 font-medium">Multiples PE, Price-to-Book, Bêta Raw/Adj, Sales</div>
+                                            <div class="text-xs font-bold text-amber-400 font-medium">Monthly Fundamentals (Bloomberg)</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">PE Multiples, Price-to-Book, Raw/Adj Beta, Sales</div>
                                         </div>
                                     </label>
                                 `;
@@ -2180,8 +2291,8 @@ def index(response: Response):
                                     <label class="flex items-center space-x-3.5 p-3.5 rounded-lg bg-[#070b15] border border-amber-950/20 hover:border-amber-900/40 transition cursor-pointer select-none col-span-1 sm:col-span-2 shadow-md shadow-slate-950/20">
                                         <input type="checkbox" name="export-item" value="bb_volatility" class="w-4 h-4 rounded border-amber-800/40 text-amber-600 bg-[#070b15] focus:ring-amber-500/20">
                                         <div>
-                                            <div class="text-xs font-bold text-amber-400 font-medium">Volatilité Réalisée 30D (Bloomberg)</div>
-                                            <div class="text-[10px] text-slate-500 font-medium">Série quotidienne historique Bloomberg</div>
+                                            <div class="text-xs font-bold text-amber-400 font-medium">Realized Volatility 30D (Bloomberg)</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Bloomberg daily historical series</div>
                                         </div>
                                     </label>
                                 `;
