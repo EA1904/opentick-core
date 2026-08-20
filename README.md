@@ -77,10 +77,14 @@ Inspect coverage dates, row counts, and auto-calculated **Quality Scores** (eval
 
 ## 📥 Consolidated Point-in-Time CSV Export
 
-Clicking the **"Exporter en CSV"** button exports a single, fully consolidated CSV file that blends both market price action and fundamental corporate metrics.
+Clicking the **"Exporter en CSV"** button opens the newly designed, high-fidelity **Export Configuration Modal**. This setup allows users to select custom start/end dates, choose between a consolidated single CSV or a ZIP folder of separate CSVs, select specific timeframes (D1, H1, 15m, 1m), include financials, corporate actions, volatility, or premium Bloomberg datasets.
+
+<p align="center">
+  <img src="docs/assets/data_explorer_export_modal.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Export Configuration Modal"/>
+</p>
 
 ### Clean Data Alignment (Excel/Pandas Preview)
-The exported CSV presents aligned daily price bars with quarterly fundamentals, providing a ready-to-use dataset for machine learning models and quantitative analyses.
+Once configured, the engine compiles and aligns the requested series using a high-performance in-memory database:
 
 <p align="center">
   <img src="docs/assets/data_explorer_csv_preview.png" width="100%" style="border-radius: 12px; border: 1px solid #1e293b;" alt="Consolidated CSV Export Preview"/>
