@@ -2054,7 +2054,10 @@ def index(response: Response):
                                         <div class="text-xs font-semibold text-slate-200">${m}</div>
                                         <div class="text-[10px] text-slate-500">Série macroéconomique historique</div>
                                     </div>
-                            } else {
+                                </label>
+                            `;
+                        });
+                    } else {
                         // 1. OHLCV timeframes grouped under subheader
                         if (status.ohlcv && status.ohlcv.length > 0) {
                             html += `<div class="col-span-1 sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-2 mb-1.5">SÉRIES DE COURS (OHLCV)</div>`;
