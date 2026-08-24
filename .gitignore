@@ -1,0 +1,35 @@
+﻿# Data Lake (generated locally — do not commit)
+lake/
+raw/
+download/
+Kaggle_Data/
+Bloomberg/
+
+# Database & cache
+catalog.db
+*.db
+
+# Environment secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs & temp
+*.log
+ingest_progress.json
+temp_check.js
+
+# IDE
+.vscode/
+.idea/
