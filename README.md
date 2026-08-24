@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <img src="https://img.shields.io/badge/OpenTick-Financial%20Data%20Lake-00D4AA?style=for-the-badge&logo=databricks&logoColor=white" alt="OpenTick"/>
 
@@ -57,7 +57,7 @@ OpenTick is a **full-stack financial data platform** designed for quants, data s
 
 The Data Explorer loads any S&P 500 symbol with **split/dividend-adjusted prices**, interactive zoom, and volume bars. Here, NVDA's AI-driven rally from ~$12 to $225 is captured in full — **from AI boom to market leadership**.
 
-![NVDA Full History Chart — OpenTick Data Explorer](Screens/1.png)
+![NVDA Full History Chart — OpenTick Data Explorer](docs/screenshots/nvda_chart_fullhistory.png)
 
 ---
 
@@ -65,7 +65,7 @@ The Data Explorer loads any S&P 500 symbol with **split/dividend-adjusted prices
 
 Drill into any period with the interactive chart. Daily Open/High/Low/Close candles with volume for NVDA's most recent trading sessions.
 
-![NVDA 2026 Zoom — Daily Candlestick](Screens/3.png)
+![NVDA 2026 Zoom — Daily Candlestick](docs/screenshots/nvda_chart_2026.png)
 
 ---
 
@@ -73,11 +73,11 @@ Drill into any period with the interactive chart. Daily Open/High/Low/Close cand
 
 The **Financial Data** tab exposes all quarterly and annual earnings pulled from SEC EDGAR and Bloomberg. Metrics include Revenue, Net Income, EPS, Cash, Operating Cash Flow, and Free Cash Flow — color-coded green for profit, red for loss.
 
-![NVDA Financial Data Table](Screens/2.png)
+![NVDA Financial Data Table](docs/screenshots/nvda_financial_data.png)
 
 Full financial history scrolled — watch NVIDIA's Revenue explode from **$4.28B (2013)** to **$215.94B (2026 Annual)** and Free Cash Flow reaching **$96.68B**:
 
-![NVDA Financial Data — Full History 2013→2026](Screens/4.png)
+![NVDA Financial Data — Full History 2013→2026](docs/screenshots/nvda_financial_fullhistory.png)
 
 ---
 
@@ -88,7 +88,7 @@ The **OHLCV Data (Table)** tab exposes raw price data rows up to the latest avai
 - Exchange: **US**
 - Full **Business Summary** from yfinance (NVIDIA Corporation operates as a data center scale AI infrastructure company...)
 
-![NVDA OHLCV Table + Metadata Sidebar](Screens/5.png)
+![NVDA OHLCV Table + Metadata Sidebar](docs/screenshots/nvda_ohlcv_table.png)
 
 ---
 
@@ -103,7 +103,7 @@ WHERE symbol = 'AAPL' AND timeframe = 'D1'
 ORDER BY timestamp DESC LIMIT 5;
 ```
 
-![DuckDB SQL Console — OpenTick](Screens/6.png)
+![DuckDB SQL Console — OpenTick](docs/screenshots/nvda_sql_console.png)
 
 Pre-built query examples included: **OHLCV AAPL Daily**, **Top Tech by Market Cap**, **Bloomberg Volatility AAPL**, **Bloomberg Multiples AAPL**.
 
@@ -113,19 +113,24 @@ Pre-built query examples included: **OHLCV AAPL Daily**, **Top Tech by Market Ca
 
 Click **Export to CSV** from any symbol view to open the Export Configuration modal. Fully configurable:
 
-**Price Series Export:**
-- Custom date range (e.g. 2015-01-02 → 2026-08-21 for NVDA)
-- Format: **Single Consolidated CSV** or **Separate CSV files in ZIP**
-- Timeframes: **15 Minutes**, **1 Hour**, **4 Hours**, **Daily (D1)**
-
-![Export Configuration — Price Series](Screens/7.png)
-
-**Fundamentals & Derivatives Export:**
-- Financial statements: **Income Statement** (Revenue, EPS), **Balance Sheet** (Assets, Debt), **Cash Flow Statement** (FCF, Operating CF)
-- **Option Volatility** — Historical HV / Implied IV from options
-- **Corporate Actions** — Historical dividends and splits
-
-![Export Configuration — Financials & Derivatives](Screens/8.png)
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <b>Price Series Export</b><br/>
+      Custom date range · Single CSV or ZIP<br/>
+      Timeframes: 15m · 1h · 4h · Daily (D1)
+      <br/><br/>
+      <img src="docs/screenshots/export_price_series.png" alt="Export Configuration — Price Series"/>
+    </td>
+    <td align="center" width="50%">
+      <b>Fundamentals &amp; Derivatives Export</b><br/>
+      Income Statement · Balance Sheet · Cash Flow<br/>
+      Option Volatility HV/IV · Corporate Actions
+      <br/><br/>
+      <img src="docs/screenshots/export_financials_derivatives.png" alt="Export Configuration — Financials &amp; Derivatives"/>
+    </td>
+  </tr>
+</table>
 
 ---
 
