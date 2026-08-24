@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <img src="https://img.shields.io/badge/OpenTick-Financial%20Data%20Lake-00D4AA?style=for-the-badge&logo=databricks&logoColor=white" alt="OpenTick"/>
 
@@ -220,10 +220,12 @@ Click **Export to CSV** from any symbol view to open the Export Configuration mo
 | **Forex** | D1, H1, M15 | EUR, GBP, JPY... | 2018 → | Alpaca + MT4 CSV |
 | **Crypto** | D1, H1, M15 | BTC, ETH, BNB... | 2018 → | Binance |
 | **Macro** | Variable | 845k+ series | 1950 → | FRED API |
-| **Fundamentals** | Quarterly/Annual | 500+ companies | 2013 → | SEC EDGAR + Bloomberg |
+| **Fundamentals** | Quarterly/Annual | 500+ companies | 2013 → | SEC EDGAR + Curated institutional data providers |
 | **Options** | EOD | SPY, QQQ, ETFs | 2019 → | DoltHub |
 
 > **530 symbols locally imported** out of 1,057 total S&P 500 tickers tracked. Each symbol contains OHLCV bars across multiple timeframes stored as Parquet partitions.
+
+> **ℹ️ Note on Fundamentals:** Quarterly earnings data (Revenue, EPS, FCF, Balance Sheet) is sourced from SEC EDGAR (public) and curated institutional data providers. For full dataset access, [contact us](#-contact--full-dataset-access).
 
 ---
 
@@ -300,6 +302,31 @@ fins = get_fundamentals("NVDA")
 
 ## 🚀 Quick Start (Docker — Recommended)
 
+### 📦 What you get when you clone
+
+Cloning this repository gives you **the full application stack** — no data is included:
+
+```
+git clone https://github.com/EA1904/opentick-core.git
+
+✅ What's included:
+   tvdata/          ← Python SDK (connectors, catalog, DuckDB helpers)
+   backend/         ← FastAPI REST API + WebSocket
+   frontend/        ← Next.js 14 Trading Dashboard
+   data_explorer.py ← Data Explorer UI (FastAPI on :8001)
+   docker-compose.yml, requirements.txt, .env.example
+   docs/screenshots/ ← Live demo screenshots
+
+❌ NOT included (generated locally after ingestion):
+   lake/            ← Parquet Data Lake (~GB of price data)
+   catalog.db       ← SQLite metadata catalogue
+   Proprietary/     ← Curated institutional data (not distributed)
+```
+
+> **💡 Want to explore immediately?** Use the [Demo Mode](#-demo-mode--try-without-ingestion) with NVDA sample data included in the repo — no API keys needed.
+
+---
+
 ### Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows, macOS, Linux)
@@ -335,6 +362,38 @@ docker compose up --build
 | ⚡ **API Backend** | http://localhost:8000 | OpenTick REST API |
 | 🎨 **Frontend App** | http://localhost:3000 | Trading Dashboard |
 | 📖 **API Docs** | http://localhost:8000/docs | Swagger / OpenAPI |
+
+---
+
+## 🎮 Demo Mode — Try Without Ingestion
+
+Don't want to run full ingestion? A **sample dataset** (NVDA — 2,926 daily bars, 2015→2026) is included in the `demo/` folder — ready to explore in under a minute.
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/EA1904/opentick-core.git
+cd opentick-core
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Load demo data (NVDA D1 2015→2026 — no API key needed)
+python demo/setup_demo.py
+
+# 4. Launch the Data Explorer
+uvicorn data_explorer:app --host 0.0.0.0 --port 8001 --reload
+
+# 5. Open http://localhost:8001 → select NVDA → explore!
+```
+
+**What the demo includes:**
+- ✅ NVDA daily OHLCV — 2,926 bars (Jan 2015 → Aug 2026)
+- ✅ Company metadata (Sector, Market Cap, Business Summary)
+- ✅ Interactive chart, OHLCV table, SQL Console, Export
+- ❌ Financial Data tab (fundamentals require full ingestion)
+- ❌ Other symbols (530 symbols available with full ingestion)
+
+> For the **full dataset** (530 symbols, fundamentals, macro, options), see [Data Ingestion](#-data-ingestion) or [contact us](#-contact--full-dataset-access).
 
 ---
 
@@ -512,9 +571,9 @@ pytest                       # Full test suite
 
 ## 📌 Important Notes
 
-> **⚠️ Important:** The **Data Lake** (`lake/`) and `catalog.db` are generated locally and **not versioned** on Git. They are rebuilt via the ingestion scripts.
+> **⚠️ Important:** The **Data Lake** (`lake/`) and `catalog.db` are generated locally and **not versioned** on Git. They are rebuilt via the ingestion scripts or via `demo/setup_demo.py` for the sample dataset.
 
-> **ℹ️ Note:** Bloomberg fundamental data requires the `Bloomberg/` folder with the corresponding CSV files at the project root.
+> **ℹ️ Note:** Fundamentals data (Revenue, EPS, FCF, Balance Sheet) is sourced from SEC EDGAR and curated institutional data providers. The full fundamentals dataset is available upon request — see [Contact](#-contact--full-dataset-access).
 
 > **💡 Tip:** On a fresh machine, full S&P 500 ingestion (530 symbols) takes approximately **30–60 minutes** depending on connection speed.
 
@@ -554,6 +613,24 @@ Contributions are welcome! Whether it's a new data connector, a bug fix, or a pe
 - 🧪 Additional test coverage
 - 🌍 Cloud deployment guides (AWS, GCP, Railway)
 - 📊 Jupyter notebook examples
+
+---
+
+## 📬 Contact & Full Dataset Access
+
+The public repo includes:
+- ✅ Full application source code (SDK, API, UI)
+- ✅ Demo dataset — NVDA D1 2015→2026 (`demo/setup_demo.py`)
+- ✅ All ingestion scripts (Yahoo Finance, Alpaca, Binance, FRED, SEC EDGAR)
+
+For access to the **curated full dataset** (530 S&P 500 symbols, fundamentals from institutional providers, macro, options):
+
+| Need | How |
+|------|-----|
+| 🗄️ Full dataset (530 symbols + fundamentals) | [Open a GitHub Issue](https://github.com/EA1904/opentick-core/issues) with subject: `Dataset Access Request` |
+| 🤝 Collaboration / Research | [GitHub Discussions](https://github.com/EA1904/opentick-core/discussions) |
+| 🐛 Bug reports | [GitHub Issues](https://github.com/EA1904/opentick-core/issues) |
+| 💡 Feature requests | [GitHub Discussions](https://github.com/EA1904/opentick-core/discussions) |
 
 ---
 

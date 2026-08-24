@@ -1,9 +1,13 @@
-﻿# Data Lake (generated locally — do not commit)
+# Data Lake (generated locally — do not commit)
 lake/
 raw/
 download/
 Kaggle_Data/
 Bloomberg/
+
+# demo/ is intentionally tracked (sample NVDA data ~270KB)
+# build_demo.py is a scratch script — not for distribution
+build_demo.py
 
 # Database & cache
 catalog.db
