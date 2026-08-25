@@ -1,20 +1,31 @@
 import os
 import shutil
+
 import pandas as pd
+
 from tvdata import (
-    get_ohlcv, sql, catalog,
-    ingest_companies, ingest_sp500_bulk,
-    ingest_archive_1d, ingest_archive_1m
+    catalog,
+    get_ohlcv,
+    ingest_archive_1d,
+    ingest_archive_1m,
+    ingest_companies,
+    ingest_sp500_bulk,
+    sql,
 )
 from tvdata.catalog import DEFAULT_DB_PATH
-from tvdata.ingest.stocks import LAKE_ROOT
 from tvdata.config import WORKSPACE_ROOT
+from tvdata.ingest.stocks import LAKE_ROOT
 
 # Setup paths
-COMPANIES_CSV = os.path.join(WORKSPACE_ROOT, "Kaggle_Data", "SP500 DATA", "sp500_companies.csv")
-STOCKS_CSV = os.path.join(WORKSPACE_ROOT, "Kaggle_Data", "SP500 DATA", "sp500_stocks.csv")
+COMPANIES_CSV = os.path.join(
+    WORKSPACE_ROOT, "Kaggle_Data", "SP500 DATA", "sp500_companies.csv"
+)
+STOCKS_CSV = os.path.join(
+    WORKSPACE_ROOT, "Kaggle_Data", "SP500 DATA", "sp500_stocks.csv"
+)
 ARCHIVE_1D = os.path.join(WORKSPACE_ROOT, "Kaggle_Data", "archive (4)", "data", "1d")
 ARCHIVE_1M = os.path.join(WORKSPACE_ROOT, "Kaggle_Data", "archive (4)", "data", "1m")
+
 
 def clean_database():
     """Reset DB and Lake for a clean test run."""
@@ -25,23 +36,24 @@ def clean_database():
         shutil.rmtree(LAKE_ROOT)
     print("Cleaned successfully.")
 
+
 def run_test():
     clean_database()
-    
+
     # 1. Ingest companies metadata
     print("\n--- TEST 1: Ingesting companies metadata ---")
     if os.path.exists(COMPANIES_CSV):
         ingest_companies(COMPANIES_CSV)
     else:
         print(f"Skipping: Metadata CSV not found at {COMPANIES_CSV}")
-        
+
     # 2. Ingest SP500 stocks (we will ingest a small chunk size of 100k to test bulk)
     print("\n--- TEST 2: Ingesting SP500 stocks daily ---")
     if os.path.exists(STOCKS_CSV):
         # We limit the CSV reading to first 200,000 rows to keep it fast during test
         # Let's temporarily copy first 200k rows to a temp file and ingest that
         temp_csv = os.path.join(WORKSPACE_ROOT, "temp_stocks_test.csv")
-        print(f"Creating temp test CSV from first 200,000 lines...")
+        print("Creating temp test CSV from first 200,000 lines...")
         try:
             # Read first 200k lines (includes header)
             df_temp = pd.read_csv(STOCKS_CSV, nrows=200000)
@@ -52,7 +64,7 @@ def run_test():
                 os.remove(temp_csv)
     else:
         print(f"Skipping: SP500 stocks CSV not found at {STOCKS_CSV}")
-        
+
     # 3. Ingest a subset of archive (4) 1d files
     # Instead of all files, we copy 5 files to a temporary folder to test the speed and correctness
     print("\n--- TEST 3: Ingesting archive (4) D1 subset ---")
@@ -63,7 +75,7 @@ def run_test():
         count = 0
         for f in os.listdir(ARCHIVE_1D):
             src_f = os.path.join(ARCHIVE_1D, f)
-            if f.endswith('.csv') and os.path.getsize(src_f) > 80_000:
+            if f.endswith(".csv") and os.path.getsize(src_f) > 80_000:
                 shutil.copy(src_f, os.path.join(temp_dir_1d, f))
                 count += 1
                 if count >= 5:
@@ -84,7 +96,7 @@ def run_test():
         count = 0
         for f in os.listdir(ARCHIVE_1M):
             src_f = os.path.join(ARCHIVE_1M, f)
-            if f.endswith('.csv') and os.path.getsize(src_f) > 80_000:
+            if f.endswith(".csv") and os.path.getsize(src_f) > 80_000:
                 shutil.copy(src_f, os.path.join(temp_dir_1m, f))
                 count += 1
                 if count >= 5:
@@ -99,7 +111,7 @@ def run_test():
 
     # 5. Verify data retrieval
     print("\n--- TEST 5: Verifying Query APIs ---")
-    
+
     # Check catalog
     print("\nCatalog records:")
     df_cat = catalog()
@@ -107,23 +119,26 @@ def run_test():
         print(df_cat.head(10))
     else:
         print("No catalog records found!")
-        
+
     # Query AAPL or another ticker from the catalog
     if len(df_cat) > 0:
-        test_symbol = df_cat.iloc[0]['symbol']
-        test_tf = df_cat.iloc[0]['timeframe']
+        test_symbol = df_cat.iloc[0]["symbol"]
+        test_tf = df_cat.iloc[0]["timeframe"]
         print(f"\nQuerying OHLCV for {test_symbol} ({test_tf}) adjusted:")
         df_ohlcv = get_ohlcv(test_symbol, test_tf)
         print(df_ohlcv.head(5))
-        
+
         print(f"\nQuerying OHLCV for {test_symbol} ({test_tf}) raw:")
         df_raw = get_ohlcv(test_symbol, test_tf, adjusted=False)
         print(df_raw.head(5))
-        
+
         # Test DuckDB SQL
         print("\nTesting SQL query direct on Parquet:")
-        df_sql = sql(f"SELECT symbol, timeframe, COUNT(*), MIN(timestamp), MAX(timestamp) FROM ohlcv WHERE symbol = '{test_symbol}' GROUP BY symbol, timeframe")
+        df_sql = sql(
+            f"SELECT symbol, timeframe, COUNT(*), MIN(timestamp), MAX(timestamp) FROM ohlcv WHERE symbol = '{test_symbol}' GROUP BY symbol, timeframe"
+        )
         print(df_sql)
-        
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     run_test()

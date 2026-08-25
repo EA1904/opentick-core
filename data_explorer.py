@@ -1,40 +1,48 @@
+import asyncio
 import os
+import json
 import sqlite3
-import pandas as pd
+import subprocess
+import sys
+
 import numpy as np
+import pandas as pd
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
+
 from tvdata.get import get_ohlcv
 from tvdata.ingest.alpaca_connector import ingest_alpaca
-from tvdata.ingest.yfinance_connector import ingest_yfinance
 from tvdata.ingest.fred_connector import ingest_fred_series
-
-import asyncio
-import subprocess
-import sys
+from tvdata.ingest.yfinance_connector import ingest_yfinance
 
 app = FastAPI(title="OpenTick — Data Explorer")
+
 
 async def run_auto_update_loop():
     # Delay first run by 10 seconds to allow smooth server start
     await asyncio.sleep(10)
     while True:
-        print("[Auto-Updater] Lancement de l'actualisation automatique en arrière-plan...")
+        print(
+            "[Auto-Updater] Lancement de l'actualisation automatique en arrière-plan..."
+        )
         try:
             subprocess.Popen([sys.executable, "-m", "tvdata.ingest.update_all_stocks"])
         except Exception as e:
             print(f"[Auto-Updater] Erreur lors du lancement de l'actualisation : {e}")
-        
+
         # Attendre 24 heures avant la prochaine actualisation
         await asyncio.sleep(86400)
+
 
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(run_auto_update_loop())
 
+
 from tvdata.config import DB_PATH, LAKE_ROOT, PROGRESS_FILE
+
 
 class IngestRequest(BaseModel):
     symbol: str
@@ -44,8 +52,10 @@ class IngestRequest(BaseModel):
     end_date: str
     asset_class: str = "stocks"
 
+
 class SQLRequest(BaseModel):
     query: str
+
 
 def get_db_conn():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
@@ -53,14 +63,14 @@ def get_db_conn():
     conn.row_factory = sqlite3.Row
     return conn
 
+
 @app.get("/api/symbols")
 def get_symbols():
     """Fetch all registered symbols and their metadata from catalog.db."""
     if not os.path.exists(DB_PATH):
         return []
-    
+
     conn = get_db_conn()
-    cursor = conn.cursor()
     try:
         # Fetch S&P 500 constituents catalog entries merged with symbol metadata
         query = """
@@ -74,23 +84,26 @@ def get_symbols():
         """
         df = pd.read_sql_query(query, conn)
         df = df.replace({np.nan: None})
-        return df.to_dict(orient='records')
+        return df.to_dict(orient="records")
     except Exception as e:
         print(f"Error fetching symbols: {e}")
         return []
     finally:
         conn.close()
 
+
 @app.get("/api/stats")
 def get_stats_endpoint():
     """Fetch global statistics for the S&P 500 catalog."""
     if not os.path.exists(DB_PATH):
         return {"total": 0, "imported": 0, "missing": 0}
-        
+
     conn = get_db_conn()
     cursor = conn.cursor()
     try:
-        total = cursor.execute("SELECT COUNT(*) FROM historical_sp500_tickers").fetchone()[0]
+        total = cursor.execute(
+            "SELECT COUNT(*) FROM historical_sp500_tickers"
+        ).fetchone()[0]
         imported = cursor.execute("""
             SELECT COUNT(DISTINCT symbol) 
             FROM data_catalog 
@@ -98,84 +111,95 @@ def get_stats_endpoint():
               AND symbol IN (SELECT symbol FROM historical_sp500_tickers)
               AND rows_count > 0
         """).fetchone()[0]
-        
+
         missing = total - imported
-        return {
-            "total": total,
-            "imported": imported,
-            "missing": missing
-        }
+        return {"total": total, "imported": imported, "missing": missing}
     except Exception as e:
         print(f"Error fetching stats: {e}")
         return {"total": 0, "imported": 0, "missing": 0}
     finally:
         conn.close()
 
+
 @app.get("/api/ohlcv")
-def get_ohlcv_endpoint(symbol: str, timeframe: str, adjusted: bool = True, start_date: str = None, end_date: str = None):
+def get_ohlcv_endpoint(
+    symbol: str,
+    timeframe: str,
+    adjusted: bool = True,
+    start_date: str = None,
+    end_date: str = None,
+):
     """Fetch OHLCV data from the Parquet lake and format for TradingView Lightweight Charts."""
     try:
         df = get_ohlcv(symbol, timeframe=timeframe, adjusted=adjusted)
         if len(df) == 0:
             return []
-        
+
         # Sort by timestamp ascending
-        df = df.sort_values('timestamp').reset_index(drop=True)
+        df = df.sort_values("timestamp").reset_index(drop=True)
 
         # Filter by date range if provided
         if start_date:
-            df = df[df['timestamp'] >= pd.to_datetime(start_date)]
+            df = df[df["timestamp"] >= pd.to_datetime(start_date)]
         if end_date:
-            df = df[df['timestamp'] <= pd.to_datetime(end_date)]
+            df = df[df["timestamp"] <= pd.to_datetime(end_date)]
 
         if len(df) == 0:
             return []
 
         # Deduplicate: keep last entry per timestamp to avoid LightweightCharts errors
-        df = df.drop_duplicates(subset=['timestamp'], keep='last')
-            
+        df = df.drop_duplicates(subset=["timestamp"], keep="last")
+
         records = []
-        is_daily = (timeframe in ['D1', '1W', '1M'])
-        
+        is_daily = timeframe in ["D1", "1W", "1M"]
+
         for _, row in df.iterrows():
             if is_daily:
                 # LightweightCharts requires "YYYY-MM-DD" string for daily series
-                time_val = pd.to_datetime(row['timestamp']).strftime('%Y-%m-%d')
+                time_val = pd.to_datetime(row["timestamp"]).strftime("%Y-%m-%d")
             else:
                 # For intraday: unix timestamp in seconds
-                time_val = int(pd.to_datetime(row['timestamp']).timestamp())
-            
-            records.append({
-                'time': time_val,
-                'open': float(row['open']) if pd.notnull(row['open']) else None,
-                'high': float(row['high']) if pd.notnull(row['high']) else None,
-                'low': float(row['low']) if pd.notnull(row['low']) else None,
-                'close': float(row['close']) if pd.notnull(row['close']) else None,
-                'value': float(row['volume']) if pd.notnull(row['volume']) else 0.0
-            })
-            
+                time_val = int(pd.to_datetime(row["timestamp"]).timestamp())
+
+            records.append(
+                {
+                    "time": time_val,
+                    "open": float(row["open"]) if pd.notnull(row["open"]) else None,
+                    "high": float(row["high"]) if pd.notnull(row["high"]) else None,
+                    "low": float(row["low"]) if pd.notnull(row["low"]) else None,
+                    "close": float(row["close"]) if pd.notnull(row["close"]) else None,
+                    "value": float(row["volume"]) if pd.notnull(row["volume"]) else 0.0,
+                }
+            )
+
         # Filter out invalid rows (must have open and close prices)
-        records = [r for r in records if r['open'] is not None and r['close'] is not None]
+        records = [
+            r for r in records if r["open"] is not None and r["close"] is not None
+        ]
         return records
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/api/financials/{symbol}")
 def get_financials_endpoint(symbol: str):
     """Fetch quarterly financials from Parquet lake for a symbol."""
-    path = os.path.join(LAKE_ROOT, "financials", "quarterly", f"{symbol.upper()}.parquet")
+    path = os.path.join(
+        LAKE_ROOT, "financials", "quarterly", f"{symbol.upper()}.parquet"
+    )
     if not os.path.exists(path):
         return []
-        
+
     try:
         df = pd.read_parquet(path)
         # Format dates
-        df['report_date'] = df['report_date'].dt.strftime('%Y-%m-%d')
+        df["report_date"] = df["report_date"].dt.strftime("%Y-%m-%d")
         df = df.replace({np.nan: None})
-        return df.to_dict(orient='records')
+        return df.to_dict(orient="records")
     except Exception as e:
         print(f"Error loading financials: {e}")
         return []
+
 
 @app.get("/api/macro/{symbol}")
 def get_macro_endpoint(symbol: str, start_date: str = None, end_date: str = None):
@@ -188,35 +212,38 @@ def get_macro_endpoint(symbol: str, start_date: str = None, end_date: str = None
                 path = os.path.join(LAKE_ROOT, "macro", "yield_curve.parquet")
             else:
                 return []
-                
+
     try:
         df = pd.read_parquet(path)
-        
+
         # Filter by date range if provided
         if start_date:
-            df = df[df['timestamp'] >= pd.to_datetime(start_date)]
+            df = df[df["timestamp"] >= pd.to_datetime(start_date)]
         if end_date:
-            df = df[df['timestamp'] <= pd.to_datetime(end_date)]
+            df = df[df["timestamp"] <= pd.to_datetime(end_date)]
 
         if len(df) == 0:
             return []
 
-        if 'value' in df.columns:
-            df = df.rename(columns={'value': 'val'})
-        elif 't_note_10y' in df.columns:
-            df['val'] = df['t_note_10y']
-            
+        if "value" in df.columns:
+            df = df.rename(columns={"value": "val"})
+        elif "t_note_10y" in df.columns:
+            df["val"] = df["t_note_10y"]
+
         records = []
         for _, row in df.iterrows():
-            ts = int(row['timestamp'].timestamp())
-            records.append({
-                'time': ts,
-                'value': float(row['val']) if pd.notnull(row['val']) else 0.0
-            })
-        return sorted(records, key=lambda x: x['time'])
+            ts = int(row["timestamp"].timestamp())
+            records.append(
+                {
+                    "time": ts,
+                    "value": float(row["val"]) if pd.notnull(row["val"]) else 0.0,
+                }
+            )
+        return sorted(records, key=lambda x: x["time"])
     except Exception as e:
         print(f"Error loading macro series: {e}")
         return []
+
 
 @app.post("/api/ingest")
 def run_ingest(req: IngestRequest):
@@ -227,53 +254,71 @@ def run_ingest(req: IngestRequest):
     start_date = req.start_date
     end_date = req.end_date
     asset_class = req.asset_class
-    
-    print(f"Ingesting: {symbol} ({timeframe}) from {source} [{start_date} -> {end_date}]")
-    
+
+    print(
+        f"Ingesting: {symbol} ({timeframe}) from {source} [{start_date} -> {end_date}]"
+    )
+
     try:
         if source == "alpaca":
             res = ingest_alpaca(symbol, timeframe, start_date, end_date, asset_class)
         elif source == "yfinance":
             res = ingest_yfinance(symbol, timeframe, start_date, end_date, asset_class)
         elif source == "fred":
-            api_key = os.environ.get('FRED_API_KEY') or os.environ.get('fred_api_key')
+            api_key = os.environ.get("FRED_API_KEY") or os.environ.get("fred_api_key")
             if not api_key or api_key == "your_fred_api_key_here":
-                raise HTTPException(status_code=400, detail="Clé FRED_API_KEY absente ou invalide dans le fichier .env. Veuillez configurer votre clé API FRED.")
+                raise HTTPException(
+                    status_code=400,
+                    detail="Clé FRED_API_KEY absente ou invalide dans le fichier .env. Veuillez configurer votre clé API FRED.",
+                )
             res = ingest_fred_series(symbol, symbol, start_date, end_date)
         else:
-            raise HTTPException(status_code=400, detail="Source invalide. Les sources supportées sont 'alpaca', 'yfinance' et 'fred'")
-            
-        if not res or res.get('rows', 0) == 0:
-            raise HTTPException(status_code=400, detail=f"Aucune donnée retournée par la source {source}. Vérifiez le symbole et les dates.")
-            
+            raise HTTPException(
+                status_code=400,
+                detail="Source invalide. Les sources supportées sont 'alpaca', 'yfinance' et 'fred'",
+            )
+
+        if not res or res.get("rows", 0) == 0:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Aucune donnée retournée par la source {source}. Vérifiez le symbole et les dates.",
+            )
+
         return res
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-import subprocess
-import sys
 
 @app.post("/api/ingest/missing")
 def trigger_ingest_missing():
     """Start ingestion script for missing S&P 500 stocks in background."""
     try:
         subprocess.Popen([sys.executable, "-m", "tvdata.ingest.ingest_missing_sp500"])
-        return {"status": "started", "message": "Importation des symboles manquants démarrée en arrière-plan."}
+        return {
+            "status": "started",
+            "message": "Importation des symboles manquants démarrée en arrière-plan.",
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/api/ingest/update_all")
 def trigger_update_all():
     """Start update script for all local stocks in background."""
     try:
         subprocess.Popen([sys.executable, "-m", "tvdata.ingest.update_all_stocks"])
-        return {"status": "started", "message": "Actualisation de toutes les actions démarrée en arrière-plan."}
+        return {
+            "status": "started",
+            "message": "Actualisation de toutes les actions démarrée en arrière-plan.",
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 import re
+
 
 @app.post("/api/sql")
 def execute_sql_query(req: SQLRequest):
@@ -281,25 +326,38 @@ def execute_sql_query(req: SQLRequest):
     query = req.query.strip()
     if not query:
         raise HTTPException(status_code=400, detail="La requête ne peut pas être vide.")
-    
+
     # Read-only security check (since this is a local app)
-    forbidden = ["insert", "update", "delete", "drop", "create table", "alter", "vacuum", "copy"]
+    forbidden = [
+        "insert",
+        "update",
+        "delete",
+        "drop",
+        "create table",
+        "alter",
+        "vacuum",
+        "copy",
+    ]
     query_lower = query.lower()
     for word in forbidden:
         if re.search(r"\b" + word + r"\b", query_lower):
-            raise HTTPException(status_code=400, detail=f"La commande '{word}' n'est pas autorisée. Seules les requêtes de lecture (SELECT) sont acceptées.")
-            
+            raise HTTPException(
+                status_code=400,
+                detail=f"La commande '{word}' n'est pas autorisée. Seules les requêtes de lecture (SELECT) sont acceptées.",
+            )
+
     try:
         from tvdata.get import sql as run_sql
+
         df = run_sql(query)
         # Handle nan/none conversions
         df = df.replace({np.nan: None})
-        
+
         # Convert timestamp/datetime columns to string representation
         for col in df.columns:
             if pd.api.types.is_datetime64_any_dtype(df[col]):
-                df[col] = df[col].dt.strftime('%Y-%m-%d %H:%M:%S')
-                
+                df[col] = df[col].dt.strftime("%Y-%m-%d %H:%M:%S")
+
         # Limit rows returned to prevent browser freeze on huge tables
         max_rows = 500
         truncated = False
@@ -307,106 +365,117 @@ def execute_sql_query(req: SQLRequest):
         if total_count > max_rows:
             df = df.head(max_rows)
             truncated = True
-            
+
         return {
             "columns": list(df.columns),
-            "rows": df.to_dict(orient='records'),
+            "rows": df.to_dict(orient="records"),
             "truncated": truncated,
             "total_rows": total_count,
-            "max_rows": max_rows
+            "max_rows": max_rows,
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 import duckdb
+
 
 @app.get("/api/datasets_status/{symbol}")
 def get_datasets_status(symbol: str):
     symbol = symbol.upper()
     status = {
         "ohlcv": [],
-        "financials": {
-            "income": False,
-            "balance": False,
-            "cashflow": False
-        },
+        "financials": {"income": False, "balance": False, "cashflow": False},
         "volatility": False,
         "options": False,
         "corporate_actions": False,
         "macro": [],
         "bloomberg_fundamentals": False,
-        "bloomberg_volatility": False
+        "bloomberg_volatility": False,
     }
-    
+
     # 1. OHLCV timeframes & Macro list
     conn = get_db_conn()
     try:
-        rows = conn.execute("SELECT DISTINCT timeframe FROM data_catalog WHERE symbol = ?", (symbol,)).fetchall()
+        rows = conn.execute(
+            "SELECT DISTINCT timeframe FROM data_catalog WHERE symbol = ?", (symbol,)
+        ).fetchall()
         status["ohlcv"] = sorted(list(set([r["timeframe"] for r in rows])))
-        
-        macro_rows = conn.execute("SELECT DISTINCT symbol FROM data_catalog WHERE asset_class = 'macro'").fetchall()
+
+        macro_rows = conn.execute(
+            "SELECT DISTINCT symbol FROM data_catalog WHERE asset_class = 'macro'"
+        ).fetchall()
         status["macro"] = [r["symbol"] for r in macro_rows]
     except Exception as e:
         print(f"Error checking catalog for status: {e}")
     finally:
         conn.close()
-        
+
     # 2. Financials
     fin_path = os.path.join(LAKE_ROOT, "financials", "quarterly", f"{symbol}.parquet")
     if os.path.exists(fin_path):
         status["financials"]["income"] = True
         status["financials"]["balance"] = True
         status["financials"]["cashflow"] = True
-        
+
     # 3. Volatility
     vol_path = os.path.join(LAKE_ROOT, "volatility", "options_vol.parquet")
     if os.path.exists(vol_path):
         try:
-            db_conn = duckdb.connect(database=':memory:')
-            res = db_conn.execute(f"SELECT COUNT(*) FROM parquet_scan('{vol_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}'").fetchone()
+            db_conn = duckdb.connect(database=":memory:")
+            res = db_conn.execute(
+                f"SELECT COUNT(*) FROM parquet_scan('{vol_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}'"
+            ).fetchone()
             if res and res[0] > 0:
                 status["volatility"] = True
         except Exception as e:
             print(f"Error checking volatility status: {e}")
-            
+
     # 4. Options
     opt_path = os.path.join(LAKE_ROOT, "options", f"{symbol}.parquet")
     if os.path.exists(opt_path):
         status["options"] = True
-        
+
     # 5. Corporate Actions
     corp_path = os.path.join(LAKE_ROOT, "corporate_actions.parquet")
     if os.path.exists(corp_path):
         try:
-            db_conn = duckdb.connect(database=':memory:')
-            res = db_conn.execute(f"SELECT COUNT(*) FROM parquet_scan('{corp_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}'").fetchone()
+            db_conn = duckdb.connect(database=":memory:")
+            res = db_conn.execute(
+                f"SELECT COUNT(*) FROM parquet_scan('{corp_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}'"
+            ).fetchone()
             if res and res[0] > 0:
                 status["corporate_actions"] = True
         except Exception as e:
             print(f"Error checking corporate actions status: {e}")
-            
+
     # 6. Bloomberg Fundamentals & Volatility
     funds_path = os.path.join(LAKE_ROOT, "bloomberg", "fundamentals.parquet")
     if os.path.exists(funds_path):
         try:
-            db_conn = duckdb.connect(database=':memory:')
-            res = db_conn.execute(f"SELECT COUNT(*) FROM parquet_scan('{funds_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}'").fetchone()
+            db_conn = duckdb.connect(database=":memory:")
+            res = db_conn.execute(
+                f"SELECT COUNT(*) FROM parquet_scan('{funds_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}'"
+            ).fetchone()
             if res and res[0] > 0:
                 status["bloomberg_fundamentals"] = True
         except Exception as e:
             print(f"Error checking bloomberg fundamentals status: {e}")
-            
+
     vol_bb_path = os.path.join(LAKE_ROOT, "bloomberg", "volatility.parquet")
     if os.path.exists(vol_bb_path):
         try:
-            db_conn = duckdb.connect(database=':memory:')
-            res = db_conn.execute(f"SELECT COUNT(*) FROM parquet_scan('{vol_bb_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}'").fetchone()
+            db_conn = duckdb.connect(database=":memory:")
+            res = db_conn.execute(
+                f"SELECT COUNT(*) FROM parquet_scan('{vol_bb_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}'"
+            ).fetchone()
             if res and res[0] > 0:
                 status["bloomberg_volatility"] = True
         except Exception as e:
             print(f"Error checking bloomberg volatility status: {e}")
-            
+
     return status
+
 
 @app.get("/api/export/volatility/{symbol}")
 def export_volatility(symbol: str):
@@ -415,13 +484,16 @@ def export_volatility(symbol: str):
     if not os.path.exists(vol_path):
         raise HTTPException(status_code=404, detail="Volatility file not found")
     try:
-        db_conn = duckdb.connect(database=':memory:')
-        df = db_conn.execute(f"SELECT * FROM parquet_scan('{vol_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}' ORDER BY timestamp ASC").df()
-        df['timestamp'] = df['timestamp'].dt.strftime('%Y-%m-%d')
+        db_conn = duckdb.connect(database=":memory:")
+        df = db_conn.execute(
+            f"SELECT * FROM parquet_scan('{vol_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}' ORDER BY timestamp ASC"
+        ).df()
+        df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%d")
         df = df.replace({np.nan: None})
-        return df.to_dict(orient='records')
+        return df.to_dict(orient="records")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/export/options/{symbol}")
 def export_options(symbol: str):
@@ -431,12 +503,13 @@ def export_options(symbol: str):
         raise HTTPException(status_code=404, detail="Options file not found")
     try:
         df = pd.read_parquet(opt_path)
-        df['timestamp'] = pd.to_datetime(df['timestamp']).dt.strftime('%Y-%m-%d')
-        df['expiration'] = pd.to_datetime(df['expiration']).dt.strftime('%Y-%m-%d')
+        df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.strftime("%Y-%m-%d")
+        df["expiration"] = pd.to_datetime(df["expiration"]).dt.strftime("%Y-%m-%d")
         df = df.replace({np.nan: None})
-        return df.to_dict(orient='records')
+        return df.to_dict(orient="records")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/export/corporate_actions/{symbol}")
 def export_corporate_actions(symbol: str):
@@ -445,13 +518,16 @@ def export_corporate_actions(symbol: str):
     if not os.path.exists(corp_path):
         raise HTTPException(status_code=404, detail="Corporate actions file not found")
     try:
-        db_conn = duckdb.connect(database=':memory:')
-        df = db_conn.execute(f"SELECT * FROM parquet_scan('{corp_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}' ORDER BY date ASC").df()
-        df['date'] = df['date'].dt.strftime('%Y-%m-%d')
+        db_conn = duckdb.connect(database=":memory:")
+        df = db_conn.execute(
+            f"SELECT * FROM parquet_scan('{corp_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}' ORDER BY date ASC"
+        ).df()
+        df["date"] = df["date"].dt.strftime("%Y-%m-%d")
         df = df.replace({np.nan: None})
-        return df.to_dict(orient='records')
+        return df.to_dict(orient="records")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/export/financials/income/{symbol}")
 def export_financials_income(symbol: str, start_date: str = None, end_date: str = None):
@@ -461,87 +537,123 @@ def export_financials_income(symbol: str, start_date: str = None, end_date: str 
         return []
     try:
         df = pd.read_parquet(path)
-        
+
         # Filter by date range if provided
         if start_date:
-            df = df[df['report_date'] >= pd.to_datetime(start_date)]
+            df = df[df["report_date"] >= pd.to_datetime(start_date)]
         if end_date:
-            df = df[df['report_date'] <= pd.to_datetime(end_date)]
-            
+            df = df[df["report_date"] <= pd.to_datetime(end_date)]
+
         if len(df) == 0:
             return []
-            
-        df['report_date'] = df['report_date'].dt.strftime('%Y-%m-%d')
+
+        df["report_date"] = df["report_date"].dt.strftime("%Y-%m-%d")
         df = df.replace({np.nan: None})
-        cols = ['report_date', 'fiscal_period', 'symbol', 'revenue', 'net_income', 'eps', 'eps_estimate', 'actual_eps', 'eps_surprise']
+        cols = [
+            "report_date",
+            "fiscal_period",
+            "symbol",
+            "revenue",
+            "net_income",
+            "eps",
+            "eps_estimate",
+            "actual_eps",
+            "eps_surprise",
+        ]
         existing_cols = [c for c in cols if c in df.columns]
-        return df[existing_cols].to_dict(orient='records')
+        return df[existing_cols].to_dict(orient="records")
     except Exception as e:
         print(f"Error: {e}")
         return []
+
 
 @app.get("/api/export/financials/balance/{symbol}")
-def export_financials_balance(symbol: str, start_date: str = None, end_date: str = None):
+def export_financials_balance(
+    symbol: str, start_date: str = None, end_date: str = None
+):
     symbol = symbol.upper()
     path = os.path.join(LAKE_ROOT, "financials", "quarterly", f"{symbol}.parquet")
     if not os.path.exists(path):
         return []
     try:
         df = pd.read_parquet(path)
-        
+
         # Filter by date range if provided
         if start_date:
-            df = df[df['report_date'] >= pd.to_datetime(start_date)]
+            df = df[df["report_date"] >= pd.to_datetime(start_date)]
         if end_date:
-            df = df[df['report_date'] <= pd.to_datetime(end_date)]
-            
+            df = df[df["report_date"] <= pd.to_datetime(end_date)]
+
         if len(df) == 0:
             return []
-            
-        df['report_date'] = df['report_date'].dt.strftime('%Y-%m-%d')
+
+        df["report_date"] = df["report_date"].dt.strftime("%Y-%m-%d")
         df = df.replace({np.nan: None})
-        cols = ['report_date', 'fiscal_period', 'symbol', 'total_assets', 'total_liabilities', 'equity', 'cash', 'total_debt']
+        cols = [
+            "report_date",
+            "fiscal_period",
+            "symbol",
+            "total_assets",
+            "total_liabilities",
+            "equity",
+            "cash",
+            "total_debt",
+        ]
         existing_cols = [c for c in cols if c in df.columns]
-        return df[existing_cols].to_dict(orient='records')
+        return df[existing_cols].to_dict(orient="records")
     except Exception as e:
         print(f"Error: {e}")
         return []
+
 
 @app.get("/api/export/financials/cashflow/{symbol}")
-def export_financials_cashflow(symbol: str, start_date: str = None, end_date: str = None):
+def export_financials_cashflow(
+    symbol: str, start_date: str = None, end_date: str = None
+):
     symbol = symbol.upper()
     path = os.path.join(LAKE_ROOT, "financials", "quarterly", f"{symbol}.parquet")
     if not os.path.exists(path):
         return []
     try:
         df = pd.read_parquet(path)
-        
+
         # Filter by date range if provided
         if start_date:
-            df = df[df['report_date'] >= pd.to_datetime(start_date)]
+            df = df[df["report_date"] >= pd.to_datetime(start_date)]
         if end_date:
-            df = df[df['report_date'] <= pd.to_datetime(end_date)]
-            
+            df = df[df["report_date"] <= pd.to_datetime(end_date)]
+
         if len(df) == 0:
             return []
-            
-        df['report_date'] = df['report_date'].dt.strftime('%Y-%m-%d')
+
+        df["report_date"] = df["report_date"].dt.strftime("%Y-%m-%d")
         df = df.replace({np.nan: None})
-        cols = ['report_date', 'fiscal_period', 'symbol', 'net_change_cash', 'operating_cf', 'capex', 'free_cash_flow']
+        cols = [
+            "report_date",
+            "fiscal_period",
+            "symbol",
+            "net_change_cash",
+            "operating_cf",
+            "capex",
+            "free_cash_flow",
+        ]
         existing_cols = [c for c in cols if c in df.columns]
-        return df[existing_cols].to_dict(orient='records')
+        return df[existing_cols].to_dict(orient="records")
     except Exception as e:
         print(f"Error: {e}")
         return []
 
+
 @app.get("/api/export/bloomberg/volatility/{symbol}")
-def export_bloomberg_volatility(symbol: str, start_date: str = None, end_date: str = None):
+def export_bloomberg_volatility(
+    symbol: str, start_date: str = None, end_date: str = None
+):
     symbol = symbol.upper()
     vol_path = os.path.join(LAKE_ROOT, "bloomberg", "volatility.parquet")
     if not os.path.exists(vol_path):
         return []
     try:
-        db_conn = duckdb.connect(database=':memory:')
+        db_conn = duckdb.connect(database=":memory:")
         query = f"SELECT DATE as date, Realized_Vol_30D as realized_vol_30d FROM parquet_scan('{vol_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}'"
         if start_date:
             query += f" AND DATE >= '{start_date}'"
@@ -549,21 +661,24 @@ def export_bloomberg_volatility(symbol: str, start_date: str = None, end_date: s
             query += f" AND DATE <= '{end_date}'"
         query += " ORDER BY DATE ASC"
         df = db_conn.execute(query).df()
-        df['date'] = df['date'].dt.strftime('%Y-%m-%d')
+        df["date"] = df["date"].dt.strftime("%Y-%m-%d")
         df = df.replace({np.nan: None})
-        return df.to_dict(orient='records')
+        return df.to_dict(orient="records")
     except Exception as e:
         print(f"Error: {e}")
         return []
 
+
 @app.get("/api/export/bloomberg/fundamentals/{symbol}")
-def export_bloomberg_fundamentals(symbol: str, start_date: str = None, end_date: str = None):
+def export_bloomberg_fundamentals(
+    symbol: str, start_date: str = None, end_date: str = None
+):
     symbol = symbol.upper()
     funds_path = os.path.join(LAKE_ROOT, "bloomberg", "fundamentals.parquet")
     if not os.path.exists(funds_path):
         return []
     try:
-        db_conn = duckdb.connect(database=':memory:')
+        db_conn = duckdb.connect(database=":memory:")
         query = f"SELECT DATE as date, Implied_Vol as implied_vol, PE_Ratio as pe_ratio, Price_to_Book as price_to_book, Beta_Raw as beta_raw, Sales as sales, Beta_Adj as beta_adj FROM parquet_scan('{funds_path.replace(os.sep, '/')}') WHERE symbol = '{symbol}'"
         if start_date:
             query += f" AND DATE >= '{start_date}'"
@@ -571,178 +686,250 @@ def export_bloomberg_fundamentals(symbol: str, start_date: str = None, end_date:
             query += f" AND DATE <= '{end_date}'"
         query += " ORDER BY DATE ASC"
         df = db_conn.execute(query).df()
-        df['date'] = df['date'].dt.strftime('%Y-%m-%d')
+        df["date"] = df["date"].dt.strftime("%Y-%m-%d")
         df = df.replace({np.nan: None})
-        return df.to_dict(orient='records')
+        return df.to_dict(orient="records")
     except Exception as e:
         print(f"Error: {e}")
         return []
+
+
 @app.get("/api/export/consolidated/{symbol}")
-def get_consolidated_export(symbol: str, timeframe: str = "D1", adjusted: bool = True, start_date: str = None, end_date: str = None,
-                            include_volatility: bool = True, include_fundamentals: bool = True, include_financials: bool = True):
+def get_consolidated_export(
+    symbol: str,
+    timeframe: str = "D1",
+    adjusted: bool = True,
+    start_date: str = None,
+    end_date: str = None,
+    include_volatility: bool = True,
+    include_fundamentals: bool = True,
+    include_financials: bool = True,
+):
     symbol = symbol.upper()
     try:
         df_ohlcv = get_ohlcv(symbol, timeframe=timeframe, adjusted=adjusted)
         if len(df_ohlcv) == 0:
-            raise HTTPException(status_code=404, detail=f"Aucune donnée OHLCV trouvée pour le symbole {symbol}")
-            
-        df_ohlcv['date_str'] = pd.to_datetime(df_ohlcv['timestamp']).dt.strftime('%Y-%m-%d')
+            raise HTTPException(
+                status_code=404,
+                detail=f"Aucune donnée OHLCV trouvée pour le symbole {symbol}",
+            )
+
+        df_ohlcv["date_str"] = pd.to_datetime(df_ohlcv["timestamp"]).dt.strftime(
+            "%Y-%m-%d"
+        )
         # Do not filter df_ohlcv here to allow ffill from historical data before start_date.
-            
+
         metadata = {"longname": "", "sector": "", "industry": "", "marketcap": None}
         conn = get_db_conn()
         try:
-            row = conn.execute("SELECT longname, sector, industry, marketcap FROM symbols_metadata WHERE symbol = ?", (symbol,)).fetchone()
+            row = conn.execute(
+                "SELECT longname, sector, industry, marketcap FROM symbols_metadata WHERE symbol = ?",
+                (symbol,),
+            ).fetchone()
             if row:
                 metadata = dict(row)
         except Exception as e:
             print(f"Error fetching metadata for consolidated export: {e}")
         finally:
             conn.close()
-            
-        df_ohlcv['symbol'] = symbol
-        df_ohlcv['company_name'] = metadata['longname']
-        df_ohlcv['sector'] = metadata['sector']
-        df_ohlcv['industry'] = metadata['industry']
-        df_ohlcv['market_cap'] = metadata['marketcap']
-        
+
+        df_ohlcv["symbol"] = symbol
+        df_ohlcv["company_name"] = metadata["longname"]
+        df_ohlcv["sector"] = metadata["sector"]
+        df_ohlcv["industry"] = metadata["industry"]
+        df_ohlcv["market_cap"] = metadata["marketcap"]
+
         # Ensure timestamp is datetime for pd.merge_asof
-        df_ohlcv['timestamp'] = pd.to_datetime(df_ohlcv['timestamp'])
-        df_res = df_ohlcv.sort_values('timestamp').copy()
-        
+        df_ohlcv["timestamp"] = pd.to_datetime(df_ohlcv["timestamp"])
+        df_res = df_ohlcv.sort_values("timestamp").copy()
+
         # 1. Bloomberg Volatility
         vol_path = os.path.join(LAKE_ROOT, "bloomberg", "volatility.parquet")
         if include_volatility and os.path.exists(vol_path):
             try:
                 df_vol = pd.read_parquet(vol_path)
-                df_vol = df_vol[df_vol['symbol'] == symbol].copy()
+                df_vol = df_vol[df_vol["symbol"] == symbol].copy()
                 if len(df_vol) > 0:
-                    df_vol['timestamp'] = pd.to_datetime(df_vol['DATE'])
-                    df_vol = df_vol.sort_values('timestamp')
-                    df_vol = df_vol.rename(columns={'Realized_Vol_30D': 'realized_vol_30d'})
-                    df_vol = df_vol[['timestamp', 'symbol', 'realized_vol_30d']]
-                    
-                    df_vol['realized_vol_30d'] = df_vol['realized_vol_30d'].ffill()
-                    
+                    df_vol["timestamp"] = pd.to_datetime(df_vol["DATE"])
+                    df_vol = df_vol.sort_values("timestamp")
+                    df_vol = df_vol.rename(
+                        columns={"Realized_Vol_30D": "realized_vol_30d"}
+                    )
+                    df_vol = df_vol[["timestamp", "symbol", "realized_vol_30d"]]
+
+                    df_vol["realized_vol_30d"] = df_vol["realized_vol_30d"].ffill()
+
                     df_res = pd.merge_asof(
-                        df_res, 
-                        df_vol, 
-                        on='timestamp', 
-                        by='symbol', 
-                        direction='backward'
+                        df_res,
+                        df_vol,
+                        on="timestamp",
+                        by="symbol",
+                        direction="backward",
                     )
             except Exception as e:
                 print(f"Error merging volatility in consolidated export: {e}")
-                
+
         # 2. Bloomberg Fundamentals
         funds_path = os.path.join(LAKE_ROOT, "bloomberg", "fundamentals.parquet")
         if include_fundamentals and os.path.exists(funds_path):
             try:
                 df_funds = pd.read_parquet(funds_path)
-                df_funds = df_funds[df_funds['symbol'] == symbol].copy()
+                df_funds = df_funds[df_funds["symbol"] == symbol].copy()
                 if len(df_funds) > 0:
-                    df_funds['timestamp'] = pd.to_datetime(df_funds['DATE'])
-                    df_funds = df_funds.sort_values('timestamp')
-                    df_funds = df_funds.rename(columns={
-                        'Implied_Vol': 'implied_vol',
-                        'PE_Ratio': 'pe_ratio',
-                        'Price_to_Book': 'price_to_book',
-                        'Beta_Raw': 'beta_raw',
-                        'Sales': 'sales',
-                        'Beta_Adj': 'beta_adj'
-                    })
-                    
-                    fund_cols = ['implied_vol', 'pe_ratio', 'price_to_book', 'beta_raw', 'sales', 'beta_adj']
+                    df_funds["timestamp"] = pd.to_datetime(df_funds["DATE"])
+                    df_funds = df_funds.sort_values("timestamp")
+                    df_funds = df_funds.rename(
+                        columns={
+                            "Implied_Vol": "implied_vol",
+                            "PE_Ratio": "pe_ratio",
+                            "Price_to_Book": "price_to_book",
+                            "Beta_Raw": "beta_raw",
+                            "Sales": "sales",
+                            "Beta_Adj": "beta_adj",
+                        }
+                    )
+
+                    fund_cols = [
+                        "implied_vol",
+                        "pe_ratio",
+                        "price_to_book",
+                        "beta_raw",
+                        "sales",
+                        "beta_adj",
+                    ]
                     df_funds[fund_cols] = df_funds[fund_cols].ffill()
-                    
-                    df_funds = df_funds[['timestamp', 'symbol'] + fund_cols]
-                    
+
+                    df_funds = df_funds[["timestamp", "symbol"] + fund_cols]
+
                     df_res = pd.merge_asof(
-                        df_res, 
-                        df_funds, 
-                        on='timestamp', 
-                        by='symbol', 
-                        direction='backward'
+                        df_res,
+                        df_funds,
+                        on="timestamp",
+                        by="symbol",
+                        direction="backward",
                     )
             except Exception as e:
                 print(f"Error merging fundamentals in consolidated export: {e}")
-                
+
         # 3. Financials quarterly
-        fin_path = os.path.join(LAKE_ROOT, "financials", "quarterly", f"{symbol}.parquet")
+        fin_path = os.path.join(
+            LAKE_ROOT, "financials", "quarterly", f"{symbol}.parquet"
+        )
         if include_financials and os.path.exists(fin_path):
             try:
                 df_fin = pd.read_parquet(fin_path)
                 if len(df_fin) > 0:
-                    df_fin['timestamp'] = pd.to_datetime(df_fin['report_date'])
-                    df_fin = df_fin.sort_values('timestamp')
-                    
-                    fin_cols = ['revenue', 'net_income', 'eps', 'cash', 'free_cash_flow']
+                    df_fin["timestamp"] = pd.to_datetime(df_fin["report_date"])
+                    df_fin = df_fin.sort_values("timestamp")
+
+                    fin_cols = [
+                        "revenue",
+                        "net_income",
+                        "eps",
+                        "cash",
+                        "free_cash_flow",
+                    ]
                     df_fin[fin_cols] = df_fin[fin_cols].ffill()
-                    
-                    df_fin = df_fin[['timestamp', 'symbol'] + fin_cols]
-                    
+
+                    df_fin = df_fin[["timestamp", "symbol"] + fin_cols]
+
                     df_res = pd.merge_asof(
-                        df_res, 
-                        df_fin, 
-                        on='timestamp', 
-                        by='symbol', 
-                        direction='backward'
+                        df_res,
+                        df_fin,
+                        on="timestamp",
+                        by="symbol",
+                        direction="backward",
                     )
             except Exception as e:
                 print(f"Error merging financials in consolidated export: {e}")
-                
+
         # Rename date column and select/format returned fields
-        df_res['date'] = df_res['date_str']
-        
+        df_res["date"] = df_res["date_str"]
+
         cols_to_return = [
-            'date', 'symbol', 'company_name', 'sector', 'industry', 'market_cap', 
-            'open', 'high', 'low', 'close', 'volume'
+            "date",
+            "symbol",
+            "company_name",
+            "sector",
+            "industry",
+            "market_cap",
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
         ]
-        
+
         joined_cols = [
-            'realized_vol_30d', 'implied_vol', 'pe_ratio', 'price_to_book', 
-            'beta_raw', 'sales', 'beta_adj', 'revenue', 'net_income', 'eps', 'cash', 'free_cash_flow'
+            "realized_vol_30d",
+            "implied_vol",
+            "pe_ratio",
+            "price_to_book",
+            "beta_raw",
+            "sales",
+            "beta_adj",
+            "revenue",
+            "net_income",
+            "eps",
+            "cash",
+            "free_cash_flow",
         ]
-        
+
         for col in joined_cols:
             if col in df_res.columns:
                 cols_to_return.append(col)
-                
+
         df_final = df_res[cols_to_return].copy()
-        
+
         # Filter by start_date and end_date AFTER joining and forward-filling
         if start_date:
-            df_final = df_final[df_final['date'] >= start_date]
+            df_final = df_final[df_final["date"] >= start_date]
         if end_date:
-            df_final = df_final[df_final['date'] <= end_date]
-            
+            df_final = df_final[df_final["date"] <= end_date]
+
         if len(df_final) == 0:
             return []
-            
+
         df_final = df_final.replace({np.nan: None})
-        return df_final.to_dict(orient='records')
+        return df_final.to_dict(orient="records")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/ingest/progress")
 def get_ingest_progress():
     progress_file = PROGRESS_FILE
     if not os.path.exists(progress_file):
-        return {"active": False, "percent": 0, "status": "Aucune tâche en cours", "step_name": ""}
+        return {
+            "active": False,
+            "percent": 0,
+            "status": "Aucune tâche en cours",
+            "step_name": "",
+        }
     try:
         with open(progress_file, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
-        return {"active": False, "percent": 0, "status": f"Erreur de lecture: {str(e)}", "step_name": ""}
+        return {
+            "active": False,
+            "percent": 0,
+            "status": f"Erreur de lecture: {e!s}",
+            "step_name": "",
+        }
+
 
 @app.post("/api/ingest/bloomberg")
 def trigger_ingest_bloomberg():
     """Start Bloomberg ingestion script in background."""
     try:
         subprocess.Popen([sys.executable, "-m", "tvdata.ingest.ingest_bloomberg"])
-        return {"status": "started", "message": "Importation des données Bloomberg démarrée en arrière-plan."}
+        return {
+            "status": "started",
+            "message": "Importation des données Bloomberg démarrée en arrière-plan.",
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/", response_class=HTMLResponse)
 def index(response: Response):
@@ -2875,6 +3062,7 @@ def index(response: Response):
     </html>
     """
     return HTMLResponse(content=html_content)
+
 
 if __name__ == "__main__":
     print("Démarrage du OpenTick Data Explorer sur le port 8001...")

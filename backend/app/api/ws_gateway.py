@@ -1,15 +1,15 @@
-from typing import List, Dict
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import json
-import asyncio
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 router = APIRouter(tags=["websocket"])
 
+
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: list[WebSocket] = []
         # Tracks active subscriptions per client: {websocket: [symbols]}
-        self.subscriptions: Dict[WebSocket, List[str]] = {}
+        self.subscriptions: dict[WebSocket, list[str]] = {}
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -45,7 +45,9 @@ class ConnectionManager:
                     # Stale connection clean up will happen on disconnect
                     pass
 
+
 manager = ConnectionManager()
+
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -57,15 +59,21 @@ async def websocket_endpoint(websocket: WebSocket):
                 message = json.loads(data)
                 action = message.get("action")
                 symbol = message.get("symbol", "").upper()
-                
+
                 if action == "subscribe" and symbol:
                     await manager.subscribe(websocket, symbol)
-                    await websocket.send_text(json.dumps({"status": "subscribed", "symbol": symbol}))
+                    await websocket.send_text(
+                        json.dumps({"status": "subscribed", "symbol": symbol})
+                    )
                 elif action == "unsubscribe" and symbol:
                     await manager.unsubscribe(websocket, symbol)
-                    await websocket.send_text(json.dumps({"status": "unsubscribed", "symbol": symbol}))
+                    await websocket.send_text(
+                        json.dumps({"status": "unsubscribed", "symbol": symbol})
+                    )
                 else:
-                    await websocket.send_text(json.dumps({"error": "Unknown action or missing symbol"}))
+                    await websocket.send_text(
+                        json.dumps({"error": "Unknown action or missing symbol"})
+                    )
             except json.JSONDecodeError:
                 await websocket.send_text(json.dumps({"error": "Invalid JSON format"}))
     except WebSocketDisconnect:

@@ -36,9 +36,11 @@ def main():
 
     # ── Warn if real data would be overwritten ───────────────
     if os.path.exists(CATALOG_DST):
-        ans = input(
-            "\n⚠️  A catalog.db already exists. Overwrite with demo data? [y/N] "
-        ).strip().lower()
+        ans = (
+            input("\n⚠️  A catalog.db already exists. Overwrite with demo data? [y/N] ")
+            .strip()
+            .lower()
+        )
         if ans != "y":
             print("Aborted. Your existing catalog.db was not modified.")
             sys.exit(0)

@@ -10,8 +10,8 @@ WORKSPACE_ROOT = os.environ.get("TRADOVERA_WORKSPACE_ROOT", DEFAULT_WORKSPACE_RO
 DATA_ROOT = os.environ.get("OPENTICK_DATA_ROOT", WORKSPACE_ROOT)
 
 # Centralized paths
-DB_PATH       = os.path.normpath(os.path.join(DATA_ROOT, "catalog.db"))
-LAKE_ROOT     = os.path.normpath(os.path.join(DATA_ROOT, "lake"))
-LAKE_PATTERN  = os.path.join(LAKE_ROOT, "ohlcv", "**", "*.parquet").replace(os.sep, '/')
+DB_PATH = os.path.normpath(os.path.join(DATA_ROOT, "catalog.db"))
+LAKE_ROOT = os.path.normpath(os.path.join(DATA_ROOT, "lake"))
+LAKE_PATTERN = os.path.join(LAKE_ROOT, "ohlcv", "**", "*.parquet").replace(os.sep, "/")
 BLOOMBERG_DIR = os.path.normpath(os.path.join(DATA_ROOT, "bloomberg"))
 PROGRESS_FILE = os.path.normpath(os.path.join(WORKSPACE_ROOT, "ingest_progress.json"))

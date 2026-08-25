@@ -1,0 +1,6 @@
+[lint]
+# Activer uniquement les règles de base (Erreurs et Fails)
+select = ["E", "F"]
+
+# Ignorer la longueur de ligne (on laisse le formateur s'en charger)
+ignore = ["E501"]

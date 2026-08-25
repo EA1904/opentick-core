@@ -284,7 +284,7 @@ prices = get_ohlcv(["NVDA", "MSFT", "GOOGL", "AMZN", "TSLA"], "D1").pivot(
 )
 ef = EfficientFrontier(
     expected_returns.mean_historical_return(prices),
-    risk_models.CovarianceShrinkage(prices).ledoit_wolf()
+    risk_models.CovarianceShrinkage(prices).ledoit_wolf(),
 )
 weights = ef.max_sharpe()  # Optimal Sharpe ratio portfolio
 ```
@@ -463,18 +463,19 @@ opentick-core/
 from tvdata import get_ohlcv, get_macro, get_fundamentals
 
 # ─── OHLCV Stocks ────────────────────────────────────────────────
-df = get_ohlcv("NVDA", "D1")                     # Daily, adjusted prices
-df = get_ohlcv("NVDA", "D1", adjusted=False)     # Raw prices (backtests)
-df = get_ohlcv("EURUSD", "H1")                   # Forex intraday
-df = get_ohlcv(["NVDA", "MSFT", "GOOGL"], "D1") # Multi-symbol
+df = get_ohlcv("NVDA", "D1")  # Daily, adjusted prices
+df = get_ohlcv("NVDA", "D1", adjusted=False)  # Raw prices (backtests)
+df = get_ohlcv("EURUSD", "H1")  # Forex intraday
+df = get_ohlcv(["NVDA", "MSFT", "GOOGL"], "D1")  # Multi-symbol
 
 # ─── Macro FRED ──────────────────────────────────────────────────
-cpi    = get_macro("CPIAUCSL")   # CPI Inflation
-rates  = get_macro("FEDFUNDS")   # Fed Funds Rate
-spread = get_macro("T10Y2Y")     # 10Y-2Y Yield Curve
+cpi = get_macro("CPIAUCSL")  # CPI Inflation
+rates = get_macro("FEDFUNDS")  # Fed Funds Rate
+spread = get_macro("T10Y2Y")  # 10Y-2Y Yield Curve
 
 # ─── DuckDB SQL Direct ──────────────────────────────────────────
 from tvdata import sql
+
 df = sql("""
     SELECT symbol, COUNT(*) as bars, MIN(timestamp) as start, MAX(timestamp) as end
     FROM ohlcv WHERE asset_class = 'stocks' AND timeframe = 'D1'
@@ -487,22 +488,25 @@ df = sql("""
 ```python
 # Backtrader
 import backtrader as bt
+
 cerebro = bt.Cerebro()
 cerebro.adddata(bt.feeds.PandasData(dataname=get_ohlcv("NVDA", "D1")))
 cerebro.run()
 
 # QuantStats — Full performance report
 import quantstats as qs
+
 returns = get_ohlcv("SPY", "D1")["close"].pct_change().dropna()
 qs.reports.html(returns, benchmark="SPY", output="report.html")
 
 # PyPortfolioOpt — Markowitz portfolio optimisation
 from pypfopt import EfficientFrontier, expected_returns, risk_models
+
 prices = get_ohlcv(["NVDA", "MSFT", "GOOGL", "AMZN"], "D1").pivot(
     index="timestamp", columns="symbol", values="adj_close"
 )
 mu = expected_returns.mean_historical_return(prices)
-S  = risk_models.CovarianceShrinkage(prices).ledoit_wolf()
+S = risk_models.CovarianceShrinkage(prices).ledoit_wolf()
 weights = EfficientFrontier(mu, S).max_sharpe()
 ```
 
