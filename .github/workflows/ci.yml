@@ -29,3 +29,8 @@ jobs:
     - name: Format Check with Ruff
       run: |
         ruff format --check .
+        
+    - name: Run Unit Tests with Pytest
+      run: |
+        pip install pytest
+        pytest tests/
