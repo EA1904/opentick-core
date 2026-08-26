@@ -1,5 +1,5 @@
 import pytest
-from tvdata.catalog import catalog
+from tvdata.get import catalog
 from tvdata.get import get_ohlcv
 
 def test_imports_and_sdk_initialization():
